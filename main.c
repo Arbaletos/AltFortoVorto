@@ -16,7 +16,7 @@ int main(int argc, char* args[])
 
 
 	gWindow = SDL_CreateWindow( "Forto Vorto", 0,0,WIDTH,HEIGHT,SDL_WINDOW_SHOWN);	
-	gRenderer = SDL_CreateRenderer(window, -1,SDL_RENDERER_ACCELERATED);
+	gRenderer = SDL_CreateRenderer(gWindow, -1,SDL_RENDERER_ACCELERATED);
 
 	SDL_SetRenderDrawColor(gRenderer, 0xBB, 0xBB,0xBB,0xBB);
 	
