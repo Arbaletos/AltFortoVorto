@@ -2,9 +2,9 @@ OBJS = main.c
 
 CC = gcc
 
-COMPILER_FLAGS = -w
+COMPILER_FLAGS = 
 
-LINKER_FLAGS = -lSDL2
+LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf
 
 OBJ_NAME = fortovorto
 
