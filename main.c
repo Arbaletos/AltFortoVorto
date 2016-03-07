@@ -3,39 +3,61 @@
 #include <SDL2/SDL_image.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <malloc.h>
 
-#define WIDTH 640
-#define HEIGHT 480
+#define WIDTH 800
+#define HEIGHT 600
+#define SIZE 20
 
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
 	TTF_Font *gFont = NULL;
 
+	int charX = WIDTH/SIZE;
+	int charY = HEIGHT/SIZE;
+	
+	char buf[WIDTH*HEIGHT/SIZE/SIZE];
+
 int init();
 int load();
+int drawChar(char text, SDL_Color tColor, int x, int y);
 int drawText(char* text, SDL_Color tColor, int x, int y);
-
+void writeH(char* text,char* buff, int x, int y); 
+void printBuf(char* buff);
+void clearBuf(char* buff);
 
 
 int main(int argc, char* args[])
 {
 	if (!init()) close();
 	if (!load()) close();
-	SDL_SetRenderDrawColor(gRenderer, 0xBB, 0xBB,0xBB,0xBB);
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
 	
 	int quit = 0;
-	SDL_Color tColor= {142,0,0};
+	int i = 0;
+	int j = 0;
+	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
+	clearBuf(buf);
 	while(!quit)
 	{
 		while(SDL_PollEvent(&e)!=0)
 		{
 			if (e.type == SDL_QUIT) quit = 1;
+			if (e.type == SDL_KEYDOWN)
+			{
+				switch(e.key.keysym.sym)
+				{
+					case SDLK_ESCAPE: quit = 1;
+							break;
+				}
+			}
 		}
 			
 		SDL_RenderClear(gRenderer);
-		drawText("ja Joba!",tColor,0,0);
+		clearBuf(buf);
+		printBuf(buf);
 		SDL_RenderPresent(gRenderer);
 	}
 	TTF_CloseFont(gFont);
@@ -49,6 +71,13 @@ int main(int argc, char* args[])
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
+}
+
+int drawChar(char text, SDL_Color tColor, int x, int y)
+{
+	char next[] = {text, '\0'};
+//	next[0] = text;
+	return drawText(next,tColor,x,y);
 }
 
 int drawText(char* text, SDL_Color tColor, int x,int y)
@@ -74,6 +103,43 @@ int drawText(char* text, SDL_Color tColor, int x,int y)
 
 	SDL_FreeSurface(tSurface);
 	SDL_DestroyTexture(tTexture);
+}
+
+void printBuf(char *buff)
+{
+	int i;
+	int j;
+	SDL_Color tColor = {0,200,0};
+	for (i=0;i<charX;i++)
+	{
+		for (j=0;j<charY;j++)
+		{
+			drawChar(buff[i+j*charX],tColor,i*SIZE,j*SIZE);
+		}
+	}
+}
+
+void clearBuf(char *buff)
+{
+	int i;
+	int j;
+	for (i=0;i<=charX;i++)
+	{
+		for (j=0;j<=charY;j++)
+		{
+			buff[i+j*charX] = ' ';
+		}
+	}
+}
+
+void writeH(char* text, char* buff, int x, int y)
+{
+	int i=0;
+	for (i=0;i<strlen(text);i++)
+	{
+		buf[y*charX+x+i] = text[i];
+	}
+	
 }
 
 int init()
@@ -110,7 +176,7 @@ int init()
 int load()
 {
 	int ret = 1;
-	gFont = TTF_OpenFont("res/COURIER.TTF",16);
+	gFont = TTF_OpenFont("res/COURIER.TTF",SIZE+5);
 	if (!gFont)
 	{
 		printf("Some Shit with your Courier Font! %s\n",TTF_GetError());
