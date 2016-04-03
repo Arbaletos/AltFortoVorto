@@ -2,14 +2,14 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
+#include "fortovorto.h"
 
 #define WIDTH 800
 #define HEIGHT 600
 #define SIZE 16
-#define LOGSIZE 548
+#define MISTOS 4
+#define MESSIZE 800*600/16/16
+#define STRSIZE 128
 
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
@@ -19,13 +19,15 @@
 	int charY = HEIGHT/SIZE;
 	int state = 0;
 	int curmist;
-	
 
-	struct Charo* Spiela = NULL;
-	struct Charo* Mistos[3];
+	FILE* glog;
 	
-	char buf[WIDTH*HEIGHT/SIZE/SIZE];
-	char subbuf[WIDTH*HEIGHT/SIZE/SIZE];
+	struct Charo* Mistos[MISTOS];
+	
+	char buf[MESSIZE];
+	char subbuf[MESSIZE];
+        char curmes[MESSIZE];
+	char *spiela = "Spiela";
 
 int init();
 int load();
@@ -36,32 +38,33 @@ void printBuf(char* buff);
 void clearBuf(char* buff);
 
 
+struct Charo* getNextCharo();
+void battleRound(int curmist);
+void refreshMistos();
+
 void getLine(char* buff, int next);
 void Aut(int symb);
 
 
-struct Charo* Charo_create(char* name, int health, int atk, int damage,int speed);
-char* Charo_list(struct Charo* kio, char* buf);
-char* Charo_getName(struct Charo* kio);
-char* Charo_attack(struct Charo* kio, struct Charo* kion, char *log);
 
 int main(int argc, char* args[])
 {
 	if (!init()) close();
 	if (!load()) close();
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
-	char log[LOGSIZE];	
+	glog = fopen("log.arc","r+");
 	int quit = 0;
-	int next = 0;
 	int i = 0;
 	int j = 0;
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
 	clearBuf(buf);
-	Spiela = Charo_create("Spiela",20,50,10,10);
-	Mistos[0] = Charo_create("Misto 1",30,40,10,5);
-	Mistos[1] = Charo_create("Misto 2", 15,60,15,12);
-	Mistos[2] = Charo_create("Misto 3",20, 30, 20,7);
+	Mistos[0] = Charo_create(spiela,30,75,60,10,10);
+	Mistos[1] = Charo_create("Misto 1",30,40,40,10,5);
+	Mistos[2] = Charo_create("Misto 2", 15,30,60,15,12);
+	Mistos[3] = Charo_create("Misto 3",20,45, 30, 20,7);
+	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Look at yourself");
+	getLine(buf,1);	
 	while(state>=0)
 	{
 		while(SDL_PollEvent(&e)!=0)
@@ -80,10 +83,14 @@ int main(int argc, char* args[])
 						break;
 					case SDLK_3: Aut(3);
 						break;
+					case SDLK_4: Aut(4);
+						break;
+					case SDLK_5: Aut(5);
+						break;
 				}
 			}
 		}
-		getLine(buf, next);
+		getLine(buf,0);
 		SDL_RenderClear(gRenderer);
 		printBuf(buf);
 		SDL_RenderPresent(gRenderer);
@@ -101,68 +108,122 @@ int main(int argc, char* args[])
 	SDL_Quit();
 }
 
+void printMistos()
+{
+	int i;
+        for (i=0;i<MISTOS;i++)
+        {
+		sprintf(curmes,"%s%d) %s\n",curmes,i+1,Charo_getName(Mistos[i]));
+	}
+}
+
 void Aut(int symb)
 {
+	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Look at yourself\n";
 	switch (state)
 	{
 		case 0:
 			if (symb==-1) state = -1;
-			if (symb==1) state = 1;
-			if (symb==2) state = 2;
-			if (symb==3) state = 3;
+			if (symb==1) {
+				state = 1;
+				sprintf(curmes,"Choose Mistvieh to Attack!\n");
+				printMistos();
+			}
+			if (symb==2) {
+				state = 2;
+				sprintf(curmes,"Choose Mistvieh to Watch!\n");
+				printMistos();
+			}
+			if (symb==3){
+				 state = 3;
+				 sprintf(curmes,"%s\n",Charo_list(Mistos[0],subbuf));
+			}
 			break;
 		case 1:
-			if (symb==-1) state = 0;
-			if (symb>=1 && symb <=3)
+			if (symb==-1) {
+				state = 0;
+				sprintf(curmes,"%s",mains);
+			}
+			if (symb>=1 && symb <=MISTOS)
 			{
 				state = 4;
-				curmist = symb;
+				sprintf(curmes,"\n");
+				battleRound(symb-1);
+ 				refreshMistos();
 			}
 			break;
 		case 2:
-			if (symb==-1) state = 0;
-			if (symb>=1 && symb <=3)
+			if (symb==-1) {
+				state = 0;
+				sprintf(curmes,"%s",mains);
+			}
+			if (symb>=1 && symb <=MISTOS)
 			{
-				state = 5;
-				curmist = symb;
+				state = 4;
+				sprintf(curmes,"%s\n",Charo_list(Mistos[symb-1],subbuf));
 			}
 			break;
 		case 3:
 		case 4:
-		case 5:
-			if (symb==-1) state = 0;
+			if (symb==-1) {
+				state = 0;
+				sprintf(curmes,"%s",mains);
+			}
 			break; 
 
+	}
+	getLine(buf,1);
+}
+
+struct Charo* getNextCharo()
+{
+	int i;
+	int max = 0;
+	int maxid = 0;
+	for (i=0;i<MISTOS;i++)
+	{
+		if ((Charo_getInitiative(Mistos[i]) >= max) && (!Charo_isTired(Mistos[i])))
+		{
+			maxid = i;
+			max = Charo_getInitiative(Mistos[maxid]);
+		}
+	}
+	if (!max) return NULL;
+	Charo_setTired(Mistos[maxid],1);
+	return Mistos[maxid];
+}
+
+void refreshMistos()
+{
+	int i;
+	for (i=0;i<MISTOS;i++)
+	{
+		Charo_setTired(Mistos[i],0);
+	}
+}
+
+void battleRound(int curmist)
+{
+	struct Charo* curChar = getNextCharo();
+        if (curChar)
+	{
+		if (Charo_getName(curChar)==spiela)
+		{
+			sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[curmist],subbuf));
+		}
+		else
+		{
+			sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[0],subbuf));
+
+		}
+		battleRound(curmist);
 	}
 }
 
 void getLine(char* buff, int next)
 {
-	clearBuf(buff);
-	switch (state)
-	{
-		case 0:
-			writeH("Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Look at yourself",buff,0,0);	
-			break;
-		case 1:
-			sprintf(subbuf,"Choose Mistvieh to Strike!\n1) %s\n2) %s\n3) %s",Charo_getName(Mistos[0]),Charo_getName(Mistos[1]),Charo_getName(Mistos[2]));
-			writeH(subbuf,buff,0,0);	
-			break;
-		case 2:
-			sprintf(subbuf,"Choose Mistvieh to Watch!\n1) %s\n2) %s\n3) %s",Charo_getName(Mistos[0]),Charo_getName(Mistos[1]),Charo_getName(Mistos[2]));
-			writeH(subbuf,buff,0,0);	
-		break;
-		case 3:
-			writeH(Charo_list(Spiela,subbuf),buff,0,0);
-			break;
-		case 4:
-			writeH(Charo_attack(Spiela,Mistos[curmist-1],subbuf),buff,0,0);
-			break;
-		case 5:
-			writeH(Charo_list(Mistos[curmist-1],subbuf),buff,0,0);
-			break;
-			
-	}
+	if (next) clearBuf(buff);
+	writeH(curmes,buff,0,0);
 }
 
 
