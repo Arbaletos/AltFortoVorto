@@ -7,7 +7,7 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define SIZE 16
-#define MISTOS 4
+#define MISTOS 10
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
 
@@ -18,7 +18,8 @@
 	int charX = WIDTH/SIZE;
 	int charY = HEIGHT/SIZE;
 	int state = 0;
-	int curmist;
+	int mistqueue = 0;
+	int mistint = 0;
 
 	FILE* glog;
 	
@@ -41,6 +42,9 @@ void clearBuf(char* buff);
 struct Charo* getNextCharo();
 void battleRound(int curmist);
 void refreshMistos();
+void newGame();
+void spamMistvieh();
+void nextTurn();
 
 void getLine(char* buff, int next);
 void Aut(int symb);
@@ -59,12 +63,7 @@ int main(int argc, char* args[])
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
 	clearBuf(buf);
-	Mistos[0] = Charo_create(spiela,30,75,60,10,10);
-	Mistos[1] = Charo_create("Misto 1",30,40,40,10,5);
-	Mistos[2] = Charo_create("Misto 2", 15,30,60,15,12);
-	Mistos[3] = Charo_create("Misto 3",20,45, 30, 20,7);
-	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Look at yourself");
-	getLine(buf,1);	
+	newGame();
 	while(state>=0)
 	{
 		while(SDL_PollEvent(&e)!=0)
@@ -76,17 +75,37 @@ int main(int argc, char* args[])
 				{
 					case SDLK_ESCAPE: Aut(-1);
 							break;
+					case SDLK_1: 
+					case SDLK_KP_1:
+						Aut(1);break;
+					case SDLK_2:
+					case SDLK_KP_2:
+						 Aut(2);break;
+					case SDLK_3:
+					case SDLK_KP_3:
+						 Aut(3);break;
+					case SDLK_4:
+					case SDLK_KP_4:
+						 Aut(4);break;
+					case SDLK_5:
+					case SDLK_KP_5:
+						 Aut(5);break;
+					case SDLK_6:
+					case SDLK_KP_6:
+						 Aut(6);break;
+					case SDLK_7:
+					case SDLK_KP_7:
+						 Aut(7);break;
+					case SDLK_8:
+					case SDLK_KP_8:
+						 Aut(8);break;
+					case SDLK_9:
+					case SDLK_KP_9:
+						 Aut(9);break;
+					case SDLK_0:
+					case SDLK_KP_0:
+						 Aut(0);break;
 
-					case SDLK_1: Aut(1);
-						break;
-					case SDLK_2: Aut(2);
-						break;
-					case SDLK_3: Aut(3);
-						break;
-					case SDLK_4: Aut(4);
-						break;
-					case SDLK_5: Aut(5);
-						break;
 				}
 			}
 		}
@@ -108,18 +127,74 @@ int main(int argc, char* args[])
 	SDL_Quit();
 }
 
+void newGame()
+{
+	int i;
+	for (i=1;i<MISTOS;i++)
+	{
+		Mistos[i] = Charo_create(Mistos[i],"nulka",0,0,0,0,0);
+	}
+	Mistos[0] = Charo_create(Mistos[0],spiela,30,25,60,10,10);
+	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n");
+	getLine(buf,1);
+	mistint = rand()%3;	
+	spamMistvieh();
+}
+
+void spamMistvieh()
+{
+	int freeslots[MISTOS-1];
+	int free = 0;
+	int i;
+	for (i=1;i<MISTOS;i++)
+	{
+		if (!Charo_isAlive(Mistos[i]))
+		{
+			freeslots[free++]=i;	
+		}
+	}
+	if (!free) mistqueue++;
+	else {
+		int col = freeslots[rand()%free];
+		Mistos[col] = Charo_create(Mistos[col],"Gobla",10,50,50,5,5);
+		sprintf(curmes,"%s\nGobla was appeared in battle!\n",curmes);
+	}
+}
+
+void nextTurn()
+{
+	if (mistqueue) 
+	{
+		mistqueue--;
+		spamMistvieh();
+	}
+	if (!mistint--) {
+		spamMistvieh();
+		mistint = rand()%3;
+	}
+	refreshMistos();
+	if (!Charo_isAlive(Mistos[0]))
+	{
+		sprintf(curmes,"%s\nLooks like u have been defeated Ahahaha!\n",curmes);
+		state = 10;
+	}
+}
+
 void printMistos()
 {
 	int i;
         for (i=0;i<MISTOS;i++)
         {
-		sprintf(curmes,"%s%d) %s\n",curmes,i+1,Charo_getName(Mistos[i]));
+		if (Charo_isAlive(Mistos[i]))
+		{
+			sprintf(curmes,"%s%d) %s\n",curmes,i,Charo_getName(Mistos[i]));
+		}
 	}
 }
 
 void Aut(int symb)
 {
-	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Look at yourself\n";
+	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n";
 	switch (state)
 	{
 		case 0:
@@ -136,7 +211,11 @@ void Aut(int symb)
 			}
 			if (symb==3){
 				 state = 3;
-				 sprintf(curmes,"%s\n",Charo_list(Mistos[0],subbuf));
+				 int heal = rand() % 10;
+				 sprintf(curmes,"U waited mal kaj healed %d damage points\n",heal);
+				 Charo_kuraci(Mistos[0],heal);
+				 battleRound(-1);
+				 nextTurn();
 			}
 			break;
 		case 1:
@@ -144,12 +223,12 @@ void Aut(int symb)
 				state = 0;
 				sprintf(curmes,"%s",mains);
 			}
-			if (symb>=1 && symb <=MISTOS)
+			if (symb>=0 && symb <MISTOS)
 			{
 				state = 4;
 				sprintf(curmes,"\n");
-				battleRound(symb-1);
- 				refreshMistos();
+				battleRound(symb);
+ 				nextTurn();
 			}
 			break;
 		case 2:
@@ -157,10 +236,10 @@ void Aut(int symb)
 				state = 0;
 				sprintf(curmes,"%s",mains);
 			}
-			if (symb>=1 && symb <=MISTOS)
+			if (symb>=0 && symb <MISTOS)
 			{
 				state = 4;
-				sprintf(curmes,"%s\n",Charo_list(Mistos[symb-1],subbuf));
+				sprintf(curmes,"%s\n",Charo_list(Mistos[symb],subbuf));
 			}
 			break;
 		case 3:
@@ -170,6 +249,10 @@ void Aut(int symb)
 				sprintf(curmes,"%s",mains);
 			}
 			break; 
+		case 10:
+			newGame();
+			state = 0;
+			break;
 
 	}
 	getLine(buf,1);
@@ -205,11 +288,14 @@ void refreshMistos()
 void battleRound(int curmist)
 {
 	struct Charo* curChar = getNextCharo();
-        if (curChar)
+        if (Charo_isAlive(curChar))
 	{
 		if (Charo_getName(curChar)==spiela)
 		{
-			sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[curmist],subbuf));
+			if (curmist>=0){
+				if (!Charo_isExist(Mistos[curmist])) sprintf(curmes,"%s U attacked Free space. Lol.\n",curmes);
+				else sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[curmist],subbuf));
+			}
 		}
 		else
 		{
@@ -337,6 +423,12 @@ int init()
 
 	gRenderer = SDL_CreateRenderer(gWindow, -1,SDL_RENDERER_ACCELERATED);
 	if (!gRenderer) ret = 0;
+
+	int i =0;
+	for (i=0;i<MISTOS;i++)
+	{
+		Mistos[i] = NULL;
+	}
 	return ret;
 }
 

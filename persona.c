@@ -16,47 +16,78 @@ struct Charo
 	int tired; //Have this Charo acted in this turn?
 };
 
-struct Charo* Charo_create(char* name,int health, int def, int atk, int damage, int speed){
+struct Charo* Charo_create(struct Charo* kiu, char* name,int health, int def, int atk, int damage, int speed){
 	static int curid = 1;
-	struct Charo *ret = malloc(sizeof(struct Charo));
-	ret->health = health;
-	ret->maxhealth = health;
-	ret->atk = atk;
-	ret->damage = damage;
-	ret->speed = speed;
-	ret->cr = 0;
-	ret->cd = 100;
-	ret->eva = def;
-	ret->name = name;
-	ret->id = curid++;
-	ret->tired = 0;
-	return ret;
+	if(kiu==NULL) kiu = malloc(sizeof(struct Charo));
+	kiu->health = health;
+	kiu->maxhealth = health;
+	kiu->atk = atk;
+	kiu->damage = damage;
+	kiu->speed = speed;
+	kiu->cr = 0;
+	kiu->cd = 100;
+	kiu->eva = def;
+	kiu->name = name;
+	kiu->id = curid++;
+	kiu->tired = 0;
+	return kiu;
+}
+
+void Charo_free(struct Charo* kiu)
+{
+	if (kiu==NULL) return;
+	free(kiu);
+	kiu = NULL;
+}
+
+int Charo_isExist(struct Charo* kiu)
+{
+	if(kiu==NULL) return 0;
+	return 1;
 }
 
 
-char* Charo_list(struct Charo* kio, char* buf)
+char* Charo_list(struct Charo* kiu, char* buf)
 {
-	sprintf(buf,"%s:\nHP:%d/%d\nPower:%d\nAttack Rate:%d\nDefense Rate:%d\nInitiative:%d\n",kio->name,kio->health,kio->maxhealth,kio->damage,kio->atk,kio->eva,kio->speed);
+	if (kiu==NULL) return NULL;
+	sprintf(buf,"%s:\nHP:%d/%d\nPower:%d\nAttack Rate:%d\nDefense Rate:%d\nInitiative:%d\n",kiu->name,kiu->health,kiu->maxhealth,kiu->damage,kiu->atk,kiu->eva,kiu->speed);
 	return buf;
 }
 
 char* Charo_getName(struct Charo* kiu)
 {
+	if (!kiu) return NULL;
 	return kiu->name;
 }
 
 int Charo_getInitiative(struct Charo* kiu)
 {
+	if (!kiu) return 0;
 	return kiu->speed;
 }
 
 int Charo_isTired(struct Charo* kiu)
-{
+{	
+	if (!kiu) return 0;
 	return kiu->tired;
 }
 
-void Charo_setTired(struct Charo* kiu, int kio)
+int Charo_isAlive(struct Charo* kiu)
 {
+	if (!kiu) return 0;
+	return kiu->health > 0;
+}
+
+void Charo_kuraci(struct Charo* kiun, int kiom)
+{
+	if (!kiun) return;
+	kiun->health+=kiom;
+	if (kiun->health>kiun->maxhealth) kiun->health = kiun->maxhealth;
+}
+
+void Charo_setTired(struct Charo* kiu, int kio)
+{	
+	if (!kiu) return;
 	kiu->tired = kio;
 }
 
