@@ -11,12 +11,22 @@
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
 
+struct charBuf
+{
+	char buf[MESSIZE];
+	int top;
+	int left;
+	int wid;
+	int hei;
+};
+
+
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
 	TTF_Font *gFont = NULL;
 
-	int charX = WIDTH/SIZE;
-	int charY = HEIGHT/SIZE;
+	int charX = 50;
+	int charY = 37;
 	int state = 0;
 	int mistqueue = 0;
 	int mistint = 0;
@@ -25,18 +35,23 @@
 	
 	struct Charo* Mistos[MISTOS];
 	
-	char buf[MESSIZE];
+	struct charBuf *logBuf = NULL;
+	struct charBuf *fieldBuf = NULL;
+	struct charBuf *hintBuf = NULL;
 	char subbuf[MESSIZE];
         char curmes[MESSIZE];
 	char *spiela = "Spiela";
+
+
 
 int init();
 int load();
 int drawChar(char text, SDL_Color tColor, int x, int y);
 int drawText(char* text, SDL_Color tColor, int x, int y);
-void writeH(char* text,char* buff, int x, int y); 
-void printBuf(char* buff);
-void clearBuf(char* buff);
+void writeH(char* text,struct charBuf* buff, int x, int y); 
+void printBuf(struct charBuf* buff);
+void clearBuf(struct charBuf* buff);
+struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei); 
 
 
 struct Charo* getNextCharo();
@@ -46,7 +61,7 @@ void newGame();
 void spamMistvieh();
 void nextTurn();
 
-void getLine(char* buff, int next);
+void getLine(struct charBuf* buff, int next);
 void Aut(int symb);
 
 
@@ -62,7 +77,7 @@ int main(int argc, char* args[])
 	int j = 0;
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
-	clearBuf(buf);
+	logBuf = createBuf(logBuf,0,10,50,26);
 	newGame();
 	while(state>=0)
 	{
@@ -109,9 +124,9 @@ int main(int argc, char* args[])
 				}
 			}
 		}
-		getLine(buf,0);
+//		getLine(logBuf,0);
 		SDL_RenderClear(gRenderer);
-		printBuf(buf);
+//		printBuf(logBuf);
 		SDL_RenderPresent(gRenderer);
 	}
 	TTF_CloseFont(gFont);
@@ -136,7 +151,7 @@ void newGame()
 	}
 	Mistos[0] = Charo_create(Mistos[0],spiela,30,25,60,10,10);
 	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n");
-	getLine(buf,1);
+	getLine(logBuf,1);
 	mistint = rand()%3;	
 	spamMistvieh();
 }
@@ -190,6 +205,18 @@ void printMistos()
 			sprintf(curmes,"%s%d) %s\n",curmes,i,Charo_getName(Mistos[i]));
 		}
 	}
+}
+void drawBattleField(struct charBuf *buff)
+{
+	int i;
+	writeH("###############",buff,0,0);
+	writeH("###############",buff,0,8);
+	for (i = 1; i<8; i++)
+	{
+		writeH("#",buff,0,i);
+		writeH("#",buff,14,i);
+	}
+	
 }
 
 void Aut(int symb)
@@ -255,7 +282,7 @@ void Aut(int symb)
 			break;
 
 	}
-	getLine(buf,1);
+	getLine(logBuf,1);
 }
 
 struct Charo* getNextCharo()
@@ -306,10 +333,10 @@ void battleRound(int curmist)
 	}
 }
 
-void getLine(char* buff, int next)
+void getLine(struct charBuf* buff, int next)
 {
-	if (next) clearBuf(buff);
-	writeH(curmes,buff,0,0);
+	//if (next) clearBuf(buff);
+	//writeH(curmes,buff,0,0);
 }
 
 
@@ -345,40 +372,45 @@ int drawText(char* text, SDL_Color tColor, int x,int y)
 	SDL_DestroyTexture(tTexture);
 }
 
-void printBuf(char *buff)
+void printBuf(struct charBuf *buff)
 {
 	int i;
 	int j;
 	SDL_Color tColor = {0,200,0};
-	for (i=0;i<charX;i++)
+	for (i=0;i<buff->wid;i++)
 	{
-		for (j=0;j<charY;j++)
+		for (j=0;j<buff->hei;j++)
 		{
-			drawChar(buff[i+j*charX],tColor,i*SIZE,j*SIZE);
+			drawChar(buff->buf[i+j*buff->wid],tColor,(i+buff->left)*SIZE,(j+buff->top)*SIZE);
 		}
 	}
 }
 
-void clearBuf(char *buff)
+struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei)
+{
+	if (kio==NULL) kio = malloc(sizeof(struct charBuf));
+	kio->left = x;
+	kio->top = y;
+	kio->wid = wid;
+	kio->hei = hei;
+	clearBuf(kio);
+} 
+
+void clearBuf(struct charBuf *buff)
 {
 	int i;
 	int j;
-	for (i=0;i<=charX;i++)
+	for (i=0;i<MESSIZE;i++)
 	{
-		for (j=0;j<=charY;j++)
-		{
-			buff[i+j*charX] = ' ';
-		}
+		buff->buf[i] = ' ';
 	}
 }
 
-void writeH(char* text, char* buff, int x, int y)
+void writeH(char* text, struct charBuf *buff, int x, int y)
 {
-	int static pos=0;
 	int i=0;
 	int nx = x;
 	int ny = y;
-	if (x>=0) pos = 0;
 	for (i=0;i<strlen(text);i++)
 	{
 		if (text[i]=='\n') 
@@ -388,10 +420,9 @@ void writeH(char* text, char* buff, int x, int y)
 		}
 		else 
 		{
-			buf[pos+ny*charX+nx+i] = text[i];
+			buff->buf[ny*buff->wid+nx+i] = text[i];
 		}
 	}
-	pos = ny*charX+nx+strlen(text);
 	
 }
 
