@@ -1,20 +1,6 @@
 #include <malloc.h>
+#include "struktoj.h"
 
-struct Charo
-{
-	int maxhealth;
-	int health;
-	int atk;
-	int eva;
-	int damage;
-	int speed;
-	int id;
-	char* name;
-	int cr;
-	int cd;
-
-	int tired; //Have this Charo acted in this turn?
-};
 
 struct Charo* Charo_create(struct Charo* kiu, char* name,int health, int def, int atk, int damage, int speed){
 	static int curid = 1;

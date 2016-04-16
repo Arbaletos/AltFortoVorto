@@ -11,15 +11,8 @@
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
 
-struct charBuf
-{
-	char buf[MESSIZE];
-	int top;
-	int left;
-	int wid;
-	int hei;
-};
 
+#include "struktoj.h"
 
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
@@ -61,7 +54,9 @@ void newGame();
 void spamMistvieh();
 void nextTurn();
 
-void getLine(struct charBuf* buff, int next);
+void getLog(struct charBuf* buff);
+void refBuffers();
+void drawBattleField(struct charBuf* buff);
 void Aut(int symb);
 
 
@@ -78,6 +73,8 @@ int main(int argc, char* args[])
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
 	logBuf = createBuf(logBuf,0,10,50,26);
+	fieldBuf = createBuf(fieldBuf,0,0,15,10);
+	hintBuf = createBuf(hintBuf,15,0,35,10);
 	newGame();
 	while(state>=0)
 	{
@@ -124,9 +121,10 @@ int main(int argc, char* args[])
 				}
 			}
 		}
-//		getLine(logBuf,0);
 		SDL_RenderClear(gRenderer);
-//		printBuf(logBuf);
+		printBuf(logBuf);
+		printBuf(hintBuf);
+		printBuf(fieldBuf);
 		SDL_RenderPresent(gRenderer);
 	}
 	TTF_CloseFont(gFont);
@@ -151,9 +149,11 @@ void newGame()
 	}
 	Mistos[0] = Charo_create(Mistos[0],spiela,30,25,60,10,10);
 	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n");
-	getLine(logBuf,1);
+	clearBuf(logBuf);
+	getLog(logBuf);
 	mistint = rand()%3;	
 	spamMistvieh();
+	refBuffers();
 }
 
 void spamMistvieh()
@@ -193,6 +193,15 @@ void nextTurn()
 		sprintf(curmes,"%s\nLooks like u have been defeated Ahahaha!\n",curmes);
 		state = 10;
 	}
+	refBuffers();
+}
+
+void refBuffers()
+{	
+	clearBuf(hintBuf);
+	clearBuf(fieldBuf);
+	drawBattleField(fieldBuf);
+	writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,0);
 }
 
 void printMistos()
@@ -282,7 +291,7 @@ void Aut(int symb)
 			break;
 
 	}
-	getLine(logBuf,1);
+	getLog(logBuf);
 }
 
 struct Charo* getNextCharo()
@@ -333,17 +342,16 @@ void battleRound(int curmist)
 	}
 }
 
-void getLine(struct charBuf* buff, int next)
+void getLog(struct charBuf* buff)
 {
-	//if (next) clearBuf(buff);
-	//writeH(curmes,buff,0,0);
+	clearBuf(buff);
+	writeH(curmes,buff,0,0);
 }
 
 
 int drawChar(char text, SDL_Color tColor, int x, int y)
 {
 	char next[] = {text, '\0'};
-//	next[0] = text;
 	return drawText(next,tColor,x,y);
 }
 
@@ -394,13 +402,14 @@ struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei)
 	kio->wid = wid;
 	kio->hei = hei;
 	clearBuf(kio);
+	
+	return kio;
 } 
 
 void clearBuf(struct charBuf *buff)
 {
 	int i;
-	int j;
-	for (i=0;i<MESSIZE;i++)
+	for (i=0;i<buff->wid*buff->hei;i++)
 	{
 		buff->buf[i] = ' ';
 	}
