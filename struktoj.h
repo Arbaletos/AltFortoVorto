@@ -1,5 +1,13 @@
-
+#define FILELEN 12
+#define VORTLEN 8
 #define MESSIZE 800*600/16/16
+
+
+struct nomList
+{
+	int len;
+	char **list;
+};
 
 struct charBuf
 {

@@ -1,4 +1,4 @@
-OBJS = main.c persona.c
+OBJS = main.c charo.c nomlist.c
 
 CC = gcc
 

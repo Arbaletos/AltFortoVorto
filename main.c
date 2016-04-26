@@ -1,8 +1,3 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
-
-#include "fortovorto.h"
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -11,8 +6,8 @@
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
 
-
 #include "struktoj.h"
+#include "fortovorto.h"
 
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
@@ -41,10 +36,6 @@ int init();
 int load();
 int drawChar(char text, SDL_Color tColor, int x, int y);
 int drawText(char* text, SDL_Color tColor, int x, int y);
-void writeH(char* text,struct charBuf* buff, int x, int y); 
-void printBuf(struct charBuf* buff);
-void clearBuf(struct charBuf* buff);
-struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei); 
 
 
 struct Charo* getNextCharo();
@@ -59,22 +50,24 @@ void refBuffers();
 void drawBattleField(struct charBuf* buff);
 void Aut(int symb);
 
-
+char Spiela_getSymbol();
 
 int main(int argc, char* args[])
 {
 	if (!init()) close();
 	if (!load()) close();
+	struct nomList * bek=NULL;
+	bek =  nomList_create(bek,"arc/best_ek");
+	nomList_print(bek);
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
-	glog = fopen("log.arc","r+");
 	int quit = 0;
 	int i = 0;
 	int j = 0;
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
 	logBuf = createBuf(logBuf,0,10,50,26);
-	fieldBuf = createBuf(fieldBuf,0,0,15,10);
-	hintBuf = createBuf(hintBuf,15,0,35,10);
+	fieldBuf = createBuf(fieldBuf,5,0,15,10);
+	hintBuf = createBuf(hintBuf,25,0,20,10);
 	newGame();
 	while(state>=0)
 	{
@@ -201,7 +194,7 @@ void refBuffers()
 	clearBuf(hintBuf);
 	clearBuf(fieldBuf);
 	drawBattleField(fieldBuf);
-	writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,0);
+	writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,1);
 }
 
 void printMistos()
@@ -215,6 +208,13 @@ void printMistos()
 		}
 	}
 }
+
+char Spiela_getSymbol()
+{
+	if (Charo_isAlive(Mistos[0])) return '$';
+	else return 'x'; 
+}
+
 void drawBattleField(struct charBuf *buff)
 {
 	int i;
@@ -222,9 +222,19 @@ void drawBattleField(struct charBuf *buff)
 	writeH("###############",buff,0,8);
 	for (i = 1; i<8; i++)
 	{
-		writeH("#",buff,0,i);
-		writeH("#",buff,14,i);
+		putChar('#',buff,0,i);
+		putChar('#',buff,14,i);
 	}
+	putChar(Charo_getSymbol(Mistos[1]),buff,2,6);
+	putChar(Charo_getSymbol(Mistos[2]),buff,4,6);
+	putChar(Charo_getSymbol(Mistos[3]),buff,6,6);
+	putChar(Charo_getSymbol(Mistos[4]),buff,2,4);
+	putChar(Charo_getSymbol(Mistos[5]),buff,4,4);
+	putChar(Charo_getSymbol(Mistos[6]),buff,6,4);
+	putChar(Charo_getSymbol(Mistos[7]),buff,2,2);
+	putChar(Charo_getSymbol(Mistos[8]),buff,4,2);
+	putChar(Charo_getSymbol(Mistos[9]),buff,6,2);
+	putChar(Spiela_getSymbol(),buff,12,4);
 	
 }
 
@@ -413,6 +423,11 @@ void clearBuf(struct charBuf *buff)
 	{
 		buff->buf[i] = ' ';
 	}
+}
+
+void putChar(char ch,struct charBuf* buff, int x, int y)
+{
+	buff->buf[y*buff->wid+x] = ch;
 }
 
 void writeH(char* text, struct charBuf *buff, int x, int y)
