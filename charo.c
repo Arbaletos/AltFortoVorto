@@ -10,8 +10,6 @@ struct Charo* Charo_create(struct Charo* kiu, char* name,int health, int def, in
 	kiu->atk = atk;
 	kiu->damage = damage;
 	kiu->speed = speed;
-	kiu->cr = 0;
-	kiu->cd = 100;
 	kiu->eva = def;
 	kiu->name = name;
 	kiu->id = curid++;
@@ -102,16 +100,14 @@ char* Charo_attack(struct Charo* kiu, struct Charo* kiun, char *log)
 				int curdamage = kiu->damage;
 				int j;
 				int mul = 0;
-				if (kiu->cr >= rand()%100) curdamage+=kiu->cd*curdamage/100;
 				for (j=0;j<eva;j++)
 				{
 					if(evarate>=rand()%100) mul++;
 				}
-				if (mul) curdamage/=mul*2;	
 				alldamage+=curdamage;
 			}
 	}
 	kiun->health-=alldamage;
-	sprintf(log,"%s deals %d damage by %d Hits to %s!\n",kiu->name,alldamage, strikes,kiun->name);
+	sprintf(log,"%s deals %d damage by %d Hits to %s",kiu->name,alldamage, strikes,kiun->name);
 	return log;
 }

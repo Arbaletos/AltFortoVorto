@@ -9,6 +9,17 @@
 #include "struktoj.h"
 #include "fortovorto.h"
 
+enum battlestates
+{
+	MAIN_MENU,
+	ATTACK_TARGET_MENU,
+	WATCH_TARGET_MENU,
+	MESSAGE,
+	NEW_GAME,
+	NEW_GAME_MENU,
+	LEVEL_UP_MENU
+};
+
 	SDL_Window* gWindow = NULL;
 	SDL_Renderer* gRenderer = NULL;
 	TTF_Font *gFont = NULL;
@@ -29,8 +40,10 @@
 	char subbuf[MESSIZE];
         char curmes[MESSIZE];
 	char *spiela = "Spiela";
-
-
+	int xp = 0;
+	int sp = 0;
+	struct nomList *bek = NULL;
+	struct nomList *bfin = NULL;
 
 int init();
 int load();
@@ -45,6 +58,7 @@ void newGame();
 void spamMistvieh();
 void nextTurn();
 
+char* genBestNomo();
 void getLog(struct charBuf* buff);
 void refBuffers();
 void drawBattleField(struct charBuf* buff);
@@ -56,9 +70,6 @@ int main(int argc, char* args[])
 {
 	if (!init()) close();
 	if (!load()) close();
-	struct nomList * bek=NULL;
-	bek =  nomList_create(bek,"arc/best_ek");
-	nomList_print(bek);
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
 	int quit = 0;
 	int i = 0;
@@ -68,7 +79,8 @@ int main(int argc, char* args[])
 	logBuf = createBuf(logBuf,0,10,50,26);
 	fieldBuf = createBuf(fieldBuf,5,0,15,10);
 	hintBuf = createBuf(hintBuf,25,0,20,10);
-	newGame();
+	state = NEW_GAME;
+	Aut(0);
 	while(state>=0)
 	{
 		while(SDL_PollEvent(&e)!=0)
@@ -140,12 +152,13 @@ void newGame()
 	{
 		Mistos[i] = Charo_create(Mistos[i],"nulka",0,0,0,0,0);
 	}
-	Mistos[0] = Charo_create(Mistos[0],spiela,30,25,60,10,10);
-	sprintf(curmes,"Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n");
+	Mistos[0] = Charo_create(Mistos[0],spiela,10,10,10,10,10);
+	sp = 100;
+	xp = 0;
+	spamMistvieh();
 	clearBuf(logBuf);
 	getLog(logBuf);
 	mistint = rand()%3;	
-	spamMistvieh();
 	refBuffers();
 }
 
@@ -163,10 +176,21 @@ void spamMistvieh()
 	}
 	if (!free) mistqueue++;
 	else {
+		char *nomo = genBestNomo();
 		int col = freeslots[rand()%free];
-		Mistos[col] = Charo_create(Mistos[col],"Gobla",10,50,50,5,5);
-		sprintf(curmes,"%s\nGobla was appeared in battle!\n",curmes);
+		Mistos[col] = Charo_create(Mistos[col],nomo,10,50,50,5,5);
+		sprintf(curmes,"%s\n%s joined the battle!\n",curmes,nomo);
 	}
+}
+
+char* genBestNomo()
+{
+	char *ek = nomList_getRandom(bek);
+	char *fin = nomList_getRandom(bfin);
+	char *ret = malloc((strlen(ek)+strlen(fin)+1)*sizeof(char));
+	sprintf(ret,"%s%s",ek,fin);
+	ret[0] = ret[0]+'A'-'a';
+	return ret;
 }
 
 void nextTurn()
@@ -184,7 +208,7 @@ void nextTurn()
 	if (!Charo_isAlive(Mistos[0]))
 	{
 		sprintf(curmes,"%s\nLooks like u have been defeated Ahahaha!\n",curmes);
-		state = 10;
+		state = NEW_GAME;
 	}
 	refBuffers();
 }
@@ -195,6 +219,8 @@ void refBuffers()
 	clearBuf(fieldBuf);
 	drawBattleField(fieldBuf);
 	writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,1);
+	sprintf(subbuf,"Skill Points: %d\nExperience: %d\n",sp,xp);
+	writeH(subbuf,hintBuf,0,7);
 }
 
 void printMistos()
@@ -240,64 +266,97 @@ void drawBattleField(struct charBuf *buff)
 
 void Aut(int symb)
 {
-	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n";
+	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n4)Spread skill points\n5)Surrender and Die";
 	switch (state)
 	{
-		case 0:
+		case MAIN_MENU:
 			if (symb==-1) state = -1;
 			if (symb==1) {
-				state = 1;
+				state = ATTACK_TARGET_MENU;
 				sprintf(curmes,"Choose Mistvieh to Attack!\n");
 				printMistos();
 			}
 			if (symb==2) {
-				state = 2;
+				state = WATCH_TARGET_MENU;
 				sprintf(curmes,"Choose Mistvieh to Watch!\n");
 				printMistos();
 			}
 			if (symb==3){
-				 state = 3;
+				 state = MESSAGE;
 				 int heal = rand() % 10;
 				 sprintf(curmes,"U waited mal kaj healed %d damage points\n",heal);
 				 Charo_kuraci(Mistos[0],heal);
 				 battleRound(-1);
 				 nextTurn();
 			}
+			if (symb==4){
+				state = LEVEL_UP_MENU;
+				sprintf(curmes,"\nChoose Your characterisk to increase!\n1)Health \n2)Evasion \n3)Attack \n4)Damage\n5)Return Back\n");
+			}
+			if (symb==5){
+				state = NEW_GAME;
+				sprintf(curmes,"Ahaha, u defeated yourself by yourself!\n");
+			}
 			break;
-		case 1:
+		case ATTACK_TARGET_MENU:
 			if (symb==-1) {
-				state = 0;
+				state = MAIN_MENU;
 				sprintf(curmes,"%s",mains);
 			}
 			if (symb>=0 && symb <MISTOS)
 			{
-				state = 4;
+				state = MESSAGE;
 				sprintf(curmes,"\n");
 				battleRound(symb);
  				nextTurn();
 			}
 			break;
-		case 2:
+		case WATCH_TARGET_MENU:
 			if (symb==-1) {
-				state = 0;
+				state = MAIN_MENU;
 				sprintf(curmes,"%s",mains);
 			}
 			if (symb>=0 && symb <MISTOS)
 			{
-				state = 4;
+				state = MESSAGE;
 				sprintf(curmes,"%s\n",Charo_list(Mistos[symb],subbuf));
 			}
 			break;
-		case 3:
-		case 4:
+		case MESSAGE:
 			if (symb==-1) {
-				state = 0;
+				state = MAIN_MENU;
 				sprintf(curmes,"%s",mains);
 			}
 			break; 
-		case 10:
+		case LEVEL_UP_MENU:
+			if (symb==5){
+				state = MAIN_MENU;
+				sprintf(curmes,"%s",mains);
+			}
+			if (symb>=1 && symb <=4)
+			{
+				state = LEVEL_UP_MENU;
+				if (sp>=1)
+				{
+					if (symb==1){
+						Mistos[0]->maxhealth++;
+						Mistos[0]->health++;
+					}
+					if (symb==2) Mistos[0]->eva++;
+					if (symb==3) Mistos[0]->atk++;
+					if (symb==4) Mistos[0]->damage++;
+					sp--;
+					sprintf(curmes,"\n");
+					refBuffers();
+				}
+				else sprintf(curmes,"You have not Skill Points!\n");
+				sprintf(curmes,"%sChoose Your characterisk to increase!\n1)Health \n2)Evasion \n3)Attack \n4)Damage\n5)Return Back\n",curmes);
+			}
+			break;
+		case NEW_GAME:
+			state = MAIN_MENU;
+			sprintf(curmes,"%s",mains);
 			newGame();
-			state = 0;
 			break;
 
 	}
@@ -340,12 +399,26 @@ void battleRound(int curmist)
 		{
 			if (curmist>=0){
 				if (!Charo_isExist(Mistos[curmist])) sprintf(curmes,"%s U attacked Free space. Lol.\n",curmes);
-				else sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[curmist],subbuf));
+				else {
+					sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[curmist],subbuf));
+					if (Charo_isAlive(Mistos[curmist])) sprintf(curmes,"%s!\n",curmes);
+					else 
+					{
+						sprintf(curmes,"%s and killed him!\n",curmes);
+						sp++;
+						xp++;
+					}
+				}
 			}
 		}
 		else
 		{
 			sprintf(curmes,"%s%s",curmes,Charo_attack(curChar,Mistos[0],subbuf));
+			if (Charo_isAlive(Mistos[0])) sprintf(curmes,"%s!\n",curmes);
+					else 
+					{
+						sprintf(curmes,"%s and killed him!\n",curmes);
+					}
 
 		}
 		battleRound(curmist);
@@ -496,6 +569,8 @@ int load()
 		printf("Some Shit with your Courier Font! %s\n",TTF_GetError());
 		ret = 0;
 	}
+	bek =  nomList_create(bek,"arc/best_ek");
+	bfin = nomList_create(bfin,"arc/best_fin");
 	return ret;
 }
 
