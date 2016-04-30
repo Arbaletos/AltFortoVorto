@@ -5,6 +5,7 @@
 #define MISTOS 10
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
+#define DIFF 100
 
 #include "struktoj.h"
 #include "fortovorto.h"
@@ -59,6 +60,7 @@ void spamMistvieh();
 void nextTurn();
 
 char* genBestNomo();
+void genCharo(Chars* kio, int points);
 void getLog(struct charBuf* buff);
 void refBuffers();
 void drawBattleField(struct charBuf* buff);
@@ -148,11 +150,17 @@ int main(int argc, char* args[])
 void newGame()
 {
 	int i;
+	Chars nul = {0,0,0,0,0};
 	for (i=1;i<MISTOS;i++)
 	{
-		Mistos[i] = Charo_create(Mistos[i],"nulka",0,0,0,0,0);
+		Mistos[i] = Charo_create(Mistos[i],"nulka",&nul);
 	}
-	Mistos[0] = Charo_create(Mistos[0],spiela,10,10,10,10,10);
+	nul.h = 20;
+	nul.e = 20;
+	nul.a = 20;
+	nul.d = 20;
+	nul.i = 10;
+	Mistos[0] = Charo_create(Mistos[0],spiela,&nul);
 	sp = 100;
 	xp = 0;
 	spamMistvieh();
@@ -178,10 +186,27 @@ void spamMistvieh()
 	else {
 		char *nomo = genBestNomo();
 		int col = freeslots[rand()%free];
-		Mistos[col] = Charo_create(Mistos[col],nomo,10,50,50,5,5);
+		Chars mist = {0,0,0,0,0};
+		genCharo(&mist,DIFF+xp);
+		Mistos[col] = Charo_create(Mistos[col],nomo,&mist);
 		sprintf(curmes,"%s\n%s joined the battle!\n",curmes,nomo);
 	}
 }
+
+void genCharo(Chars* kio,int points)
+{
+	kio->i = rand()%20+1;
+	int ad = rand()%80+10;
+	int eh = rand()%91+5;
+	int da = rand()%91+5;
+	int a = points*ad/100;
+	int d = points - a;
+	kio->d = a*da/100;
+	kio->a = a - kio->d;
+	kio->e = d*eh/100;
+	kio->h = d - kio->e;
+}
+
 
 char* genBestNomo()
 {

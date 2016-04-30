@@ -2,15 +2,15 @@
 #include "struktoj.h"
 
 
-struct Charo* Charo_create(struct Charo* kiu, char* name,int health, int def, int atk, int damage, int speed){
+struct Charo* Charo_create(struct Charo* kiu, char* name,Chars* kio, int speed){
 	static int curid = 1;
 	if(kiu==NULL) kiu = malloc(sizeof(struct Charo));
-	kiu->health = health;
-	kiu->maxhealth = health;
-	kiu->atk = atk;
-	kiu->damage = damage;
-	kiu->speed = speed;
-	kiu->eva = def;
+	kiu->health = kio->h;
+	kiu->maxhealth = kio->h;
+	kiu->atk = kio->a;
+	kiu->damage = kio->d;
+	kiu->speed = kio->i;
+	kiu->eva = kio->e;
 	kiu->name = name;
 	kiu->id = curid++;
 	kiu->tired = 0;

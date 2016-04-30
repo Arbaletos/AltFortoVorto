@@ -8,7 +8,7 @@
 #include <malloc.h>
 
 
-struct Charo* Charo_create(struct Charo* kiu, char* name, int health, int def, int atk, int damage,int speed);
+struct Charo* Charo_create(struct Charo* kiu, char* name, Chars* kio);
 char* Charo_list(struct Charo* kiu, char* buf);
 char* Charo_getName(struct Charo* kiu);
 int Charo_getInitiative(struct Charo* kiu);

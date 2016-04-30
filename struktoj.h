@@ -28,10 +28,21 @@ struct Charo
 	int speed;
 	int id;
 	char* name;
-	int cr;
-	int cd;
-
 	int tired; //Have this Charo acted in this turn?
 };
+
+struct Chars
+{
+	int h;
+	int e;
+	int a;
+	int d;
+	int i;
+};
+
+typedef struct Chars Chars;
+
+
+
 
 
