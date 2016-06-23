@@ -1,14 +1,17 @@
-
 #define WIDTH 800
 #define HEIGHT 600
 #define SIZE 16
 #define MISTOS 10
 #define MESSIZE 800*600/16/16
 #define STRSIZE 128
-#define DIFF 100
+#define DIFF 50
+
+#define INITXP 200
 
 #include "struktoj.h"
 #include "fortovorto.h"
+#include <stdlib.h>
+#include <time.h>
 
 enum battlestates
 {
@@ -18,7 +21,12 @@ enum battlestates
 	MESSAGE,
 	NEW_GAME,
 	NEW_GAME_MENU,
-	LEVEL_UP_MENU
+	NEW_GAME_CLASS,
+	MAIN_MAP,
+	LEVEL_UP_MENU,
+	BATTLE_MENU,
+	CHECK_HERO,
+	VICTORY
 };
 
 	SDL_Window* gWindow = NULL;
@@ -41,8 +49,11 @@ enum battlestates
 	char subbuf[MESSIZE];
         char curmes[MESSIZE];
 	char *spiela = "Spiela";
+	char sp_class[STRSIZE];
 	int xp = 0;
 	int sp = 0;
+
+	int level = 1;
 	struct nomList *bek = NULL;
 	struct nomList *bfin = NULL;
 
@@ -54,7 +65,8 @@ int drawText(char* text, SDL_Color tColor, int x, int y);
 
 struct Charo* getNextCharo();
 void battleRound(int curmist);
-void refreshMistos();
+int startBattle();
+int refreshMistos(); //returns count of alive mistos
 void newGame();
 void spamMistvieh();
 void nextTurn();
@@ -70,18 +82,19 @@ char Spiela_getSymbol();
 
 int main(int argc, char* args[])
 {
-	if (!init()) close();
-	if (!load()) close();
+	if (!init()) exit(0);
+	if (!load()) exit(0);
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
 	int quit = 0;
 	int i = 0;
 	int j = 0;
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
-	logBuf = createBuf(logBuf,0,10,50,26);
-	fieldBuf = createBuf(fieldBuf,5,0,15,10);
-	hintBuf = createBuf(hintBuf,25,0,20,10);
+	logBuf = createBuf(logBuf,0,10,50,26,1);
+	fieldBuf = createBuf(fieldBuf,5,0,15,10,0);
+	hintBuf = createBuf(hintBuf,25,0,20,10,0);
 	state = NEW_GAME;
+	srand(time(0));
 	Aut(0);
 	while(state>=0)
 	{
@@ -92,7 +105,10 @@ int main(int argc, char* args[])
 			{
 				switch(e.key.keysym.sym)
 				{
-					case SDLK_ESCAPE: Aut(-1);
+					case SDLK_RETURN:
+							Aut(-1);
+							break;
+					case SDLK_ESCAPE: Aut(-100);
 							break;
 					case SDLK_1: 
 					case SDLK_KP_1:
@@ -147,27 +163,34 @@ int main(int argc, char* args[])
 	SDL_Quit();
 }
 
-void newGame()
+int startBattle()
 {
 	int i;
+	int ret;
 	Chars nul = {0,0,0,0,0};
 	for (i=1;i<MISTOS;i++)
 	{
 		Mistos[i] = Charo_create(Mistos[i],"nulka",&nul);
 	}
-	nul.h = 20;
-	nul.e = 20;
-	nul.a = 20;
-	nul.d = 20;
+	ret = rand()%9+1;
+	for (i=0;i<ret;i++)
+	{
+		spamMistvieh();
+	}
+	return ret;
+}
+
+void newGame()
+{
+	int i;
+	Chars nul = {0,0,0,0,0};
 	nul.i = 10;
 	Mistos[0] = Charo_create(Mistos[0],spiela,&nul);
-	sp = 100;
+	level = 0;
+	sp = INITXP;
 	xp = 0;
-	spamMistvieh();
 	clearBuf(logBuf);
 	getLog(logBuf);
-	mistint = rand()%3;	
-	refBuffers();
 }
 
 void spamMistvieh()
@@ -187,7 +210,7 @@ void spamMistvieh()
 		char *nomo = genBestNomo();
 		int col = freeslots[rand()%free];
 		Chars mist = {0,0,0,0,0};
-		genCharo(&mist,DIFF+xp);
+		genCharo(&mist,DIFF+level);
 		Mistos[col] = Charo_create(Mistos[col],nomo,&mist);
 		sprintf(curmes,"%s\n%s joined the battle!\n",curmes,nomo);
 	}
@@ -196,15 +219,17 @@ void spamMistvieh()
 void genCharo(Chars* kio,int points)
 {
 	kio->i = rand()%20+1;
-	int ad = rand()%80+10;
-	int eh = rand()%91+5;
-	int da = rand()%91+5;
+
+	int ad = rand()%80+10;//Attack - Defense  30 .. 70
+	int eh = rand()%30+60;//Evasion - Health  60 .. 90
+	int da = rand()%30+60;//Damage - Attack   60 .. 90
 	int a = points*ad/100;
 	int d = points - a;
-	kio->d = a*da/100;
-	kio->a = a - kio->d;
-	kio->e = d*eh/100;
-	kio->h = d - kio->e;
+	
+	kio->h = d*eh/100;
+	kio->e = d - kio->h;
+	kio->a = a*da/100;
+	kio->d = a - kio->a;
 }
 
 
@@ -220,16 +245,18 @@ char* genBestNomo()
 
 void nextTurn()
 {
-	if (mistqueue) 
-	{
-		mistqueue--;
-		spamMistvieh();
+//	if (!mistint--) {
+//		spamMistvieh();
+//		mistint = rand()%3;
+//	}
+	
+	int count = refreshMistos();
+	if (!count)
+        {
+		sprintf(curmes,"%s\n Victory!!!\n",curmes);
+		state = VICTORY;
 	}
-	if (!mistint--) {
-		spamMistvieh();
-		mistint = rand()%3;
-	}
-	refreshMistos();
+	sprintf(curmes,"%s\n%d enemies left!\n",curmes,count);
 	if (!Charo_isAlive(Mistos[0]))
 	{
 		sprintf(curmes,"%s\nLooks like u have been defeated Ahahaha!\n",curmes);
@@ -242,10 +269,13 @@ void refBuffers()
 {	
 	clearBuf(hintBuf);
 	clearBuf(fieldBuf);
-	drawBattleField(fieldBuf);
-	writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,1);
-	sprintf(subbuf,"Skill Points: %d\nExperience: %d\n",sp,xp);
-	writeH(subbuf,hintBuf,0,7);
+	if (fieldBuf->visible) drawBattleField(fieldBuf);
+	if (hintBuf->visible)
+	{
+		writeH(Charo_list(Mistos[0],subbuf),hintBuf,0,1);
+		sprintf(subbuf,"Experience: %d\n",xp);
+		writeH(subbuf,hintBuf,0,7);
+	}
 }
 
 void printMistos()
@@ -289,13 +319,19 @@ void drawBattleField(struct charBuf *buff)
 	
 }
 
-void Aut(int symb)
+void Aut(int symb)  //Automato
 {
-	char *mains = "Ok, warior. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n4)Spread skill points\n5)Surrender and Die";
+	char *mains = "Ok,%s. What u wanna do?\n1)Attack Mistvieh\n2)Look at Mistvieh\n3)Wait a bit\n4)Run away\n5)Die\n";
+	char *mapmes = "Ok, %s! You standing in halls of leidenbrining. Was vollen sie Machen?\n1)Go forward, into darkness!\n2)Rest some time to heal wounds\n3)Check your Hero";
+	static char *nexts;
+	static int next;
+	if (symb==-100)
+	{
+		state = -1;
+	}
 	switch (state)
 	{
 		case MAIN_MENU:
-			if (symb==-1) state = -1;
 			if (symb==1) {
 				state = ATTACK_TARGET_MENU;
 				sprintf(curmes,"Choose Mistvieh to Attack!\n");
@@ -308,18 +344,29 @@ void Aut(int symb)
 			}
 			if (symb==3){
 				 state = MESSAGE;
-				 int heal = rand() % 10;
-				 sprintf(curmes,"U waited mal kaj healed %d damage points\n",heal);
-				 Charo_kuraci(Mistos[0],heal);
+	//			 int heal = rand() % 10;
+				 sprintf(curmes,"U waited mal!\n");
+//				 Charo_kuraci(Mistos[0],heal);
 				 battleRound(-1);
 				 nextTurn();
+				 next = MAIN_MENU;
+				 nexts = mains;
 			}
 			if (symb==4){
-				state = LEVEL_UP_MENU;
-				sprintf(curmes,"\nChoose Your characterisk to increase!\n1)Health \n2)Evasion \n3)Attack \n4)Damage\n5)Return Back\n");
+				sprintf(curmes,"U run away like a dog!\n");
+				battleRound(-1);
+				nextTurn();
+								
 			}
+//			if (symb==4){
+//				state = LEVEL_UP_MENU;
+//				sprintf(curmes,"\nChoose Your characterisk to increase!\n1)Health \n2)Evasion \n3)Attack \n4)Damage\n5)Return Back\n");
+//			}
 			if (symb==5){
 				state = NEW_GAME;
+				fieldBuf->visible = 0;
+				hintBuf->visible = 0;
+				refBuffers();
 				sprintf(curmes,"Ahaha, u defeated yourself by yourself!\n");
 			}
 			break;
@@ -331,9 +378,12 @@ void Aut(int symb)
 			if (symb>=0 && symb <MISTOS)
 			{
 				state = MESSAGE;
+				next = MAIN_MENU;
+				nexts = mains;
 				sprintf(curmes,"\n");
 				battleRound(symb);
  				nextTurn();
+				
 			}
 			break;
 		case WATCH_TARGET_MENU:
@@ -344,24 +394,28 @@ void Aut(int symb)
 			if (symb>=0 && symb <MISTOS)
 			{
 				state = MESSAGE;
+				next = MAIN_MENU;
+				nexts = mains;
 				sprintf(curmes,"%s\n",Charo_list(Mistos[symb],subbuf));
 			}
 			break;
 		case MESSAGE:
 			if (symb==-1) {
-				state = MAIN_MENU;
-				sprintf(curmes,"%s",mains);
+				state = next;
+				sprintf(curmes,"%s",nexts);
 			}
 			break; 
 		case LEVEL_UP_MENU:
 			if (symb==5){
-				state = MAIN_MENU;
-				sprintf(curmes,"%s",mains);
+				hintBuf -> visible = 0;
+				refBuffers();
+				state = MAIN_MAP;
+				sprintf(curmes,mapmes,sp_class);
 			}
 			if (symb>=1 && symb <=4)
 			{
 				state = LEVEL_UP_MENU;
-				if (sp>=1)
+				if (xp>=1)
 				{
 					if (symb==1){
 						Mistos[0]->maxhealth++;
@@ -370,7 +424,7 @@ void Aut(int symb)
 					if (symb==2) Mistos[0]->eva++;
 					if (symb==3) Mistos[0]->atk++;
 					if (symb==4) Mistos[0]->damage++;
-					sp--;
+					xp--;
 					sprintf(curmes,"\n");
 					refBuffers();
 				}
@@ -379,9 +433,116 @@ void Aut(int symb)
 			}
 			break;
 		case NEW_GAME:
-			state = MAIN_MENU;
-			sprintf(curmes,"%s",mains);
+			state = NEW_GAME_CLASS;
 			newGame();
+			sprintf(curmes,"Harray! Hello My friend. Now you finded ya excellent word using power, and, so, u are near the great tomb of leidenbringos\nYou now need to select ya class!\n1)Deathbringer\n2)Deathoverpainer\n3)Harmonist\n4)Random!");
+			break;
+		case NEW_GAME_CLASS:
+			if (symb==1)
+			{
+				int health = INITXP *3 / 10;
+				Mistos[0]->health = health;
+				Mistos[0]->maxhealth = health;
+				Mistos[0]->eva = INITXP / 10;
+				Mistos[0]->atk = INITXP * 5 / 10;
+				Mistos[0]->damage = INITXP / 10;
+	//			sp_class = "DeathBringer";
+			}
+			if (symb==2)
+			{
+				int health = INITXP *5 / 10;
+				Mistos[0]->health = health;
+				Mistos[0]->maxhealth = health;
+				Mistos[0]->eva = INITXP / 10;
+				Mistos[0]->atk = INITXP * 3/ 10;
+				Mistos[0]->damage = INITXP /10;
+	//			sp_class = "Overpainer";
+			}
+			if (symb==3)
+			{	
+				int health = INITXP *4 / 10;
+				Mistos[0]->health = health;
+				Mistos[0]->maxhealth = health;
+				Mistos[0]->eva = INITXP / 10;
+				Mistos[0]->atk = INITXP * 4 / 10;
+				Mistos[0]->damage = INITXP / 10;
+	//			sp_class = "Harmonist";
+			}
+			if (symb==4)
+			{
+				Chars mist = {0,0,0,0,0};
+				genCharo(&mist,INITXP);
+				Mistos[0]->health=mist.h;
+				Mistos[0]->maxhealth = mist.h;
+				Mistos[0]->eva = mist.e;
+				Mistos[0]->atk = mist.a;
+				Mistos[0]->damage = mist.d;
+	//			sp_class = "Fortunator";
+			}
+			state = MAIN_MAP;
+			sprintf(curmes,mapmes,sp_class);
+			break;
+		case VICTORY:
+			state = MAIN_MAP;	
+			fieldBuf->visible = 0;
+			hintBuf->visible = 0;
+			refBuffers();
+			sprintf(curmes,mapmes,sp_class);
+		case MAIN_MAP:
+			if (symb==1)
+			{
+				state = BATTLE_MENU;
+				int numa = startBattle();
+				level++;
+				sprintf(curmes,"U see aproaching group of droglemistojkoj in count of %d! What do u wanna present them?\n1)Face them in fair battle!\n2)Flee like a mitvieh!\n",numa);
+			}
+			if (symb==2)
+			{
+				 next = MAIN_MAP;
+				 nexts = mapmes;
+			         state = MESSAGE;
+				 int heal = rand() % Mistos[0]->maxhealth;
+				 sprintf(curmes,"U waited mal and Healed on %dterrible damage,amiko!\n",heal);
+				 Charo_kuraci(Mistos[0],heal);
+				 level++;
+			}
+			if (symb==3)
+			{
+				state = CHECK_HERO;
+				hintBuf->visible = 1;
+				refBuffers();
+				sprintf(curmes,"1)Spend XP\n2)Back\n");
+			}
+			break;
+		case CHECK_HERO:
+			if (symb==1){
+				state = LEVEL_UP_MENU;
+				sprintf(curmes,"\nChoose Your characterisk to increase!\n1)Health \n2)Evasion \n3)Attack \n4)Damage\n5)Return Back\n");
+			}
+
+			if (symb==2)
+			{
+				hintBuf -> visible = 0;
+				refBuffers();
+				state = MAIN_MAP;
+				sprintf(curmes,mapmes,sp_class);
+			}
+			break;
+		case BATTLE_MENU:
+			if (symb==1)
+			{	
+				
+			fieldBuf->visible = 1;
+				hintBuf->visible = 1;
+				refBuffers();
+				state = MAIN_MENU;
+				sprintf(curmes,mains,sp_class);
+			}
+			if (symb==2)
+			{
+				state = MAIN_MAP;
+				sprintf(curmes,mapmes,sp_class);
+			}
 			break;
 
 	}
@@ -395,7 +556,7 @@ struct Charo* getNextCharo()
 	int maxid = 0;
 	for (i=0;i<MISTOS;i++)
 	{
-		if ((Charo_getInitiative(Mistos[i]) >= max) && (!Charo_isTired(Mistos[i])))
+		if ((Charo_isAlive(Mistos[i])) && (Charo_getInitiative(Mistos[i]) >= max) && (!Charo_isTired(Mistos[i])))
 		{
 			maxid = i;
 			max = Charo_getInitiative(Mistos[maxid]);
@@ -406,13 +567,16 @@ struct Charo* getNextCharo()
 	return Mistos[maxid];
 }
 
-void refreshMistos()
+int refreshMistos()
 {
 	int i;
+	int count;
 	for (i=0;i<MISTOS;i++)
 	{
+		if (Charo_isAlive(Mistos[i]) && i>0) count++;
 		Charo_setTired(Mistos[i],0);
 	}
+	return count;
 }
 
 void battleRound(int curmist)
@@ -430,7 +594,6 @@ void battleRound(int curmist)
 					else 
 					{
 						sprintf(curmes,"%s and killed him!\n",curmes);
-						sp++;
 						xp++;
 					}
 				}
@@ -502,13 +665,14 @@ void printBuf(struct charBuf *buff)
 	}
 }
 
-struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei)
+struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei, int vis)
 {
 	if (kio==NULL) kio = malloc(sizeof(struct charBuf));
 	kio->left = x;
 	kio->top = y;
 	kio->wid = wid;
 	kio->hei = hei;
+	kio->visible = vis;
 	clearBuf(kio);
 	
 	return kio;
@@ -535,15 +699,21 @@ void writeH(char* text, struct charBuf *buff, int x, int y)
 	int ny = y;
 	for (i=0;i<strlen(text);i++)
 	{
+		if (nx>=buff->wid)
+		{
+			nx -=buff->wid;
+			ny++;
+		}
 		if (text[i]=='\n') 
 		{
-			nx=0-i-1;
+			nx = -1;
 			ny++;
 		}
 		else 
 		{
-			buff->buf[ny*buff->wid+nx+i] = text[i];
+			buff->buf[ny*buff->wid+nx] = text[i];
 		}
+		nx++;
 	}
 	
 }

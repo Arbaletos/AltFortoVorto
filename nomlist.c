@@ -1,6 +1,7 @@
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "struktoj.h"
 
 struct nomList *nomList_create(struct nomList *kio, char* filename)

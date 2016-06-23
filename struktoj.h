@@ -16,6 +16,7 @@ struct charBuf
 	int left;
 	int wid;
 	int hei;
+	int visible;
 };
 
 struct Charo

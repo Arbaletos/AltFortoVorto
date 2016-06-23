@@ -29,4 +29,4 @@ void writeH(char* text,struct charBuf* buff, int x, int y);
 void putChar(char ch,struct charBuf* buff, int x, int y);
 void printBuf(struct charBuf* buff);
 void clearBuf(struct charBuf* buff);
-struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei); 
+struct charBuf* createBuf(struct charBuf* kio, int x, int y, int wid, int hei, int vis); 

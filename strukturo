@@ -1,0 +1,26 @@
+States Automato;
+
+Level_Up
+Choose_Action
+Battle_Round
+Enemies Arrive
+Main_Map
+
+
+
+Main_Map(Enemies Hello!) -> Choose Action;
+Choose Action(Battle Action) -> Battle_Round
+Battle_Round(Hero Died) -> Game end
+Battle_Round(Enemies Defeated) -> Level_Up
+Battle_Round(Everyone's fine) -> Enemies Arrive
+Level_Up(Enough Xp) -> 
+
+Main_Map:
+	1)Move Forward;
+	2)Rest;
+	3)Spend Xp;
+
+Choose_Action:
+	1)Attack;
+	2)Wait;
+	3)Run Away;

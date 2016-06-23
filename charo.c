@@ -1,4 +1,5 @@
 #include <malloc.h>
+#include <stdlib.h>
 #include "struktoj.h"
 
 
