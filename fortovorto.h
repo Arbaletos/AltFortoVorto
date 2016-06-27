@@ -12,7 +12,6 @@ struct Charo* Charo_create(struct Charo* kiu, char* name, Chars* kio);
 char* Charo_list(struct Charo* kiu, char* buf);
 char* Charo_getName(struct Charo* kiu);
 int Charo_getInitiative(struct Charo* kiu);
-char* Charo_attack(struct Charo* kiu, struct Charo* kiun, char *log);
 int Charo_isTired(struct Charo* kiu);
 void Charo_setTired(struct Charo* kiu, int kio);
 int Charo_isAlive(struct Charo* kiu);
@@ -20,8 +19,10 @@ void Charo_kuraci(struct Charo* kiun,int kiom);
 int Charo_isExist(struct Charo* kiu);
 void Charo_free(struct Charo* kiu);
 char Charo_getSymbol(struct Charo* kiu);
+struct battleRes* Charo_attack(struct battleRes* ret, int kiuatk,int kiudmg, int kiuneva);
 
 struct nomList *nomList_create(struct nomList *kio, char* filename);
+
 char *nomList_print(struct nomList* kio);
 char *nomList_getRandom(struct nomList* kio);
 

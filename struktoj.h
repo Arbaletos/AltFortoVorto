@@ -32,6 +32,13 @@ struct Charo
 	int tired; //Have this Charo acted in this turn?
 };
 
+struct battleRes
+{
+	int strikes;
+	int bstrikes;
+	int dmg;
+};
+
 struct Chars
 {
 	int h;

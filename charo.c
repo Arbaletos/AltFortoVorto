@@ -84,21 +84,23 @@ void Charo_setTired(struct Charo* kiu, int kio)
 	kiu->tired = kio;
 }
 
-char* Charo_attack(struct Charo* kiu, struct Charo* kiun, char *log)
+struct battleRes* Charo_attack(struct battleRes* ret, int kiuatk,int kiudmg, int kiuneva)
 {
-	int strikes = kiu->atk / 100*2;
+	int strikes = kiuatk / 100*2;
 	if(!strikes) strikes = 1;
-	int rate = kiu->atk / strikes;
-	int eva = kiun->eva / 100*2;
+	int rate = kiuatk / strikes;
+	int eva = kiuneva / 100*2;
 	if(!eva) eva = 1;
-	int evarate = kiun->eva/eva;
+	int evarate = kiuneva/eva;
 	int i;
 	int alldamage=0;
+	ret->bstrikes = 0;
+	ret->strikes = strikes;
 	for (i=0; i<strikes; i++)
 	{
 		if (rate>= rand()%100)
 			{
-				int curdamage = kiu->damage;
+				int curdamage = kiudmg;
 				int j;
 				int mul = 0;
 				for (j=0;j<eva;j++)
@@ -106,9 +108,9 @@ char* Charo_attack(struct Charo* kiu, struct Charo* kiun, char *log)
 					if(evarate>=rand()%100) mul++;
 				}
 				alldamage+=curdamage;
+				ret->bstrikes++;
 			}
 	}
-	kiun->health-=alldamage;
-	sprintf(log,"%s deals %d damage by %d Hits to %s",kiu->name,alldamage, strikes,kiun->name);
-	return log;
+	ret->dmg=alldamage;
+	return ret;
 }
