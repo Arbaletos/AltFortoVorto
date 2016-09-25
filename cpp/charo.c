@@ -10,7 +10,7 @@ class Charo
         id,      //ID
         tired,   //Acted this turn au ne
 	exist;   //cxu this Charo really exists?
-    const char *name;  //Name of Charo
+    char *name;  //Name of Charo
 
   public:
     Charo()
@@ -29,7 +29,7 @@ class Charo
       exist = 0;
     }
 
-    Charo recreate(Chars kio, const char* kioname)
+    Charo recreate(Chars kio, char* kioname)
     {
       hp = kio.h;
       mhp = kio.h;
@@ -60,6 +60,11 @@ class Charo
     {
       return this->mhp;
     }
+    
+    int getHealth()
+    {
+      return this->hp;
+    }
 
     int getDamage()
     {
@@ -77,7 +82,7 @@ class Charo
     }
 
 
-    const char* getName()
+    char* getName()
     {
       return this->name;
     }
