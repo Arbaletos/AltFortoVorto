@@ -1,0 +1,19 @@
+#define cxefa main
+#define reveni return
+#define entjera integer
+#define ento int
+#define signo char
+#define strukto struct 
+#define por for
+#define if se
+#define elnomo enum
+#define dosiero FILE
+#define tipdifi typedef
+//difini tipon
+#define NULO NULL
+#define malplena void
+#define kazo case
+#define break cxesigi
+
+
+
