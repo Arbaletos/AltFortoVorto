@@ -18,7 +18,7 @@ RAK - Яростный удар в лицо (+ATK+DMG)
 DOR - Критическая атака(CR/CD)
 MIN - Нанесение кровотечения(TIME/DMG)
 FAR - Кровожадный удар(Урон в себя ради топ-урона)(SELB/BON)
-ZAG - 
+ZAG - Отхил в случае кровотока опа
 
 SCIENCIST//ограничен ингридиентами
 
@@ -36,4 +36,7 @@ AER -Wind attack agains ATK-powerfull enemiues
 WAS -Water attack agains EVA-powerfull enemies
 TER -Earth attack against HP-powerull enmies
 
-ELEMENTIST
+Дилетант-заклинания 1
+
+BAR:
+
