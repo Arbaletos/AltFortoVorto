@@ -1,39 +1,38 @@
+/*
+struct reakto
+{
+  reakt_type type;
+  int value;
+  void* target;
+};
+*/
+typedef struct
+{
+  int value;
+} u_val;
 
-//using namespace std;
-//class Nomaro
-//{
-//  private:
-//    int len;
-//    std::vector<char *> list;
-//  
-//  public:
-//    Nomaro(char* filename);
-//    void print();
-//    char* getRandom();
-//};
+typedef struct 
+{
+  int x;
+  int y;
+  Charo* mistos[9];
+} cell;
 
-//struct charBuf
-//{
-//	char buf[MESSIZE];
-//	int top;
-//	int left;
-//	int wid;
-//	int hei;
-//	int visible;
-//};
+typedef struct
+{
+  int w;
+  int h;
+  Charo* charo;
+  cell* cp;
+  int ter;
+} celo;
 
-//struct Charo
-//{
-//	int maxhealth;
-//	int health;
-//	int atk;
-//	int eva;
-//	int damage;
-//	int speed;
-//	int id;
-//	char* name;
-//	int tired; //Have this Charo acted in this turn?
-//};
+typedef struct
+{
+  int type;
+  int time;
+  Ago* ago;
+} trigger;
 
 struct battleRes
 {

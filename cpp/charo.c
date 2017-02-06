@@ -1,16 +1,18 @@
+
 class Charo
 {
   private:
-    int hp,   	 //Health
-        mhp,     //Maximum Health
-        eva,     //Evasion Rate
-        atk,     //Attack Rate
-        dmg,     //Damage
-        speed,   //Initiative
-        id,      //ID
-        tired,   //Acted this turn au ne
-	exist;   //cxu this Charo really exists?
-    char *name;  //Name of Charo
+    int 	hp,   	 //Health
+        	mhp,     //Maximum Health
+        	eva,     //Evasion Rate
+        	atk,     //Attack Rate
+        	dmg,     //Damage
+       	 	speed,   //Initiative
+        	id,      //ID
+	        tired,   //Acted this turn au ne
+		exist;   //cxu this Charo really exists?
+    char* 	name;  	 //Name of Charo
+    Efektaro*   efektaro;
 
   public:
     Charo()
@@ -22,11 +24,26 @@ class Charo
       atk = 0;
       eva = 0;
       dmg = 0;
-      speed = 0;
+//      speed = 0;
       name = NULL;
       id = curid++;
       tired = 0;
       exist = 0;
+      efektaro = new Efektaro(this);
+    }
+
+    Charo(Chars kio, char* kioname)
+    {
+        hp = kio.h;
+        mhp = kio.h;
+        atk = kio.a;
+        eva = kio.e;
+        dmg = kio.d;
+        speed = kio.i;
+        name = kioname;
+        tired = 0;
+        exist = 1;
+        efektaro = new Efektaro(this);
     }
 
     Charo recreate(Chars kio, char* kioname)
@@ -40,12 +57,63 @@ class Charo
       name = kioname;
       tired = 0;
       exist = 1;
+      if (efektaro) free(efektaro);
+      efektaro = new Efektaro(this);
       if (!kio.h) exist = 0;
+    }
+  
+//    void addTrigger(trigger* newt)
+//    {
+//      efektaro.addTriiger(newt);
+/*
+      trigeto* curt = ftrigger;
+      if (ftrigger == NULL) 
+      {
+        ftrigger = new trigeto;
+        ftrigger->curt = newt;
+        ftrigger->next = NULL;
+      }
+      else 
+      {
+        while(curt->next!=NULL) curt = curt->next;
+        curt->next = new trigeto;
+        curt->next->next = NULL;
+        curt->next->curt = newt;
+      }*/
+//    }
+    void addEfekt(int type, int ttl, void* val )
+    {
+      efektaro->addEfekt(type,ttl,val);
+    }
+        
+    void applyTriggers(battleQueue* bq,int type,int time)
+    {
+      efektaro->applyTriggers(bq, type, time);
+/*
+//      printf("%s has triggers to check!\n",name);
+      if (ftrigger==NULL) return;
+//      printf("%s has triggers to check!\n",name);
+      trigeto* curt = ftrigger;
+      while (curt!=NULL)
+      {
+        if (type == curt->curt->type) 
+        { 
+        if (((type==ON_TIME)&&(time==curt->curt->time))||(type!=ON_TIME))
+          {
+          printf("Launching trigger!\n");
+     //     bq->addAgo(ago,19);
+          bq->addAgo(curt->curt->ago,time);
+         //// bq->addAgo(curt->curt->ago,time);
+          }
+        }
+        curt = curt->next;
+      }
+*/
     }
 
     char* list(char *buf)
     {
-      sprintf(buf,"%s:\nHP:%d/%d\nPower:%d\nAttack Rate:%d\nDefense Rate:%d\nInitiative:%d\n",name,hp,mhp,dmg,atk,eva,speed);
+      sprintf(buf,"%s:\nHP:%d/%d\nPower:%d\nAttack Rate:%d\nDefense Rate:%d\nInitiative:%d\n\n",name,hp,mhp,dmg,atk,eva,speed);
       return buf;
     }
 

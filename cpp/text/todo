@@ -5,9 +5,13 @@ DiletantVortoj:aldoni simplajn vortojn por diletantoj
 VortKreskado: Aldoni ebleco de kreskado de diletanta vortojn
 Bossoj: Aldoni grosaj malamikoj
 
-EFEKTO klaso - Por povi fari ion
-ROOTA klaso - Por efektivi progresado de Fortavortoj
-:wq
+
+efekto.c	-mod of ago
+cell.c		-pack of charos
+ago.c		-smth, that charo does
+reskto.c	-smth, that happens like response on ago
+battlequeue.c	-queue og battlemoves por bona jes
+
 
 
 

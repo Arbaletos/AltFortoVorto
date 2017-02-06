@@ -1,0 +1,16 @@
+Do,arena estas main module for test battle structure of our excellent game, and this so-called arena is necessary to do this(test) good.
+
+PLayer can manipulate arena per consol input.
+
+#################
+#       |       #
+# G H I | G H I #
+#       |       #
+# D E F | D E F #
+#       |       #
+# A B C | A B C #
+#       |       #
+#################
+
+user can use manage comands, and act comands: manage to change battlefield, str enemies, spawn enemies, e.t.c.
+act comands - simulates round.

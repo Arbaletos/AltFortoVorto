@@ -582,48 +582,6 @@ void Aut(int symb)  //Automato
 				sprintf(mapmes,"Ok,%s the %s! You now in %s. What you going to do?\n\n1)Geradeaus\n2)Camp here for some time\n3)Check Hero\n",name,sp_class,"Halls of Leiden");
 				sprintf(curmes,"%s",mapmes);
 			}
-//			if (symb==1)
-//			{
-//				int health = INITXP *3 / 10;
-//				Mistos[0]->health = health;
-//				Mistos[0]->maxhealth = health;
-//				Mistos[0]->eva = INITXP / 10;
-//				Mistos[0]->atk = INITXP * 5 / 10;
-//				Mistos[0]->damage = INITXP / 10;
-//				strcpy(sp_class,"Barbaro");
-//			}
-//			if (symb==2)
-//			{
-//				int health = INITXP *5 / 10;
-//				Mistos[0]->health = health;
-//				Mistos[0]->maxhealth = health;
-//				Mistos[0]->eva = INITXP / 10;
-//				Mistos[0]->atk = INITXP * 3/ 10;
-//				Mistos[0]->damage = INITXP /10;
-//				strcpy(sp_class,"Sciencist");
-//			}
-//			if (symb==3)
-//			{	
-//				int health = INITXP *4 / 10;
-//				Mistos[0]->health = health;
-//				Mistos[0]->maxhealth = health;
-//				Mistos[0]->eva = INITXP / 10;
-//				Mistos[0]->atk = INITXP * 4 / 10;
-//				Mistos[0]->damage = INITXP / 10;
-//				strcpy(sp_class,"Elementist");
-//			}
-//			if (symb==4)
-//			{
-//				Chars mist = {0,0,0,0,0};
-//				genCharo(&mist,INITXP);
-//				Mistos[0]->health=mist.h;
-//				Mistos[0]->maxhealth = mist.h;
-//				Mistos[0]->eva = mist.e;
-//				Mistos[0]->atk = mist.a;
-//				Mistos[0]->damage = mist.d;
-//				strcpy(sp_class,"Fortunator");
-//			}
-//			sprintf(Mistos[0]->name,"%s the %s",Mistos[0]->name,sp_class);
 			break;
 		case VICTORY:
                         leaveBattle();
