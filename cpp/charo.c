@@ -85,6 +85,11 @@ class Charo
     {
       efektaro->addEfekt(type,ttl,val);
     }
+
+    void nextTurn()
+    {
+      efektaro->refresh(1);
+    }
         
     void applyTriggers(battleQueue* bq,int type,int time)
     {

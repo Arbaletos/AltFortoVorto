@@ -50,6 +50,12 @@ void  battleQueue::run()
       turn[i]++;
     }
   }
+  for (j=0;j<9;j++)
+  {
+    if (cell1->mistos[j]->isExist()) cell1->mistos[j]->nextTurn();
+    if (cell2->mistos[j]->isExist()) cell2->mistos[j]->nextTurn();
+  }
+
 //      while (agoj) aguUnuan();
 }
 

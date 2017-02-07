@@ -8,7 +8,7 @@ struct reakto
 */
 typedef struct
 {
-  int value;
+  int val;
 } u_val;
 
 typedef struct 

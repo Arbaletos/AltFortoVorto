@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 //  trigger undead = {ON_TIME,19,new Ago(spieler, NULL,NULL,10000,HEAL_DAMAGE)};
 //  spieler->addTrigger(&undead);
   u_val uval = {10};
-  spieler->addEfekt(BLEEDING,10,&uval); 
+  spieler->addEfekt(REGENERATION,1,&uval); 
   bq = battleQueue(&mcell,&scell); 
   printf("Welcome! To the Arena!\n");
   srand(time(0));
