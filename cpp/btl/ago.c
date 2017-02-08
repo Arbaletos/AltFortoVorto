@@ -21,6 +21,7 @@
   {
     if (TYPE == GET_DAMAGE)
     {
+        kreanto->applyTriggers(caller,ON_GET_DAMAGE,turntime);
 	printf(get_damage_mes_fmt[LANG],kreanto->getName(),val);
         kreanto->changeHealth(-val);
         Reporto* ret = new stringRep("Get damage!\n");
@@ -29,6 +30,7 @@
     if (TYPE == HEAL_DAMAGE)
     {
 	printf(heal_damage_mes_fmt[LANG],kreanto->getName(),val);
+        kreanto->applyTriggers(caller,ON_HEAL_DAMAGE,turntime);
         kreanto->changeHealth(val);
         Reporto* ret = new stringRep("Healed damage!\n");
         return ret; 
@@ -36,6 +38,7 @@
 
     if (TYPE == ATAKI_IUN)
     {
+      kreanto->applyTriggers(caller,ON_ATTACK,turntime);
       printf ("%s is Attacking %s!\n",kreanto->getName(),celo->getCharo()->getName());
       Charo* targ = celo->getCharo();
       int strikes = kreanto->getAttack() / 100 * 2;
@@ -51,6 +54,7 @@
       {
          if (rate>=rand() % 100)
          {
+           kreanto->applyTriggers(caller,ON_HIT,turntime);
            int curdamage = kreanto->getDamage();
            int mul = 0;
            for (j=0;j<eva;j++)

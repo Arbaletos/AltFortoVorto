@@ -29,6 +29,7 @@ enum trigoj
   ON_ATTACK,
   ON_HIT,
   ON_GET_DAMAGE, 
+  ON_HEAL_DAMAGE, 
   ON_TURNSTART,
   ON_TURNEND,
   ON_TIME

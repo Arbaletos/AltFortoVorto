@@ -80,6 +80,7 @@ class Efektaro
           {
             curt->prev->next = curt->next;
           }
+          if (!curt->prev && !curt->next) ftrigger = NULL;
           trigeto* next = curt->next;
           free(curt);
           curt = next;
@@ -139,7 +140,7 @@ class Efektaro
     {
 //      printf("%s has triggers to check!\n",name);
       if (ftrigger==NULL) return;
-//      printf("%s has triggers to check!\n",name);
+      printf("s has triggers to check!\n");
       trigeto* curt = ftrigger;
       while (curt!=NULL)
       {
@@ -172,7 +173,6 @@ void Efektaro::refresh(int turn)
         {
           printf("Effekt end, removing!\n");
           removeTrigger(cur->cur);
-          printf("Help me i am putin");
           if (cur->next)
           {
             cur->next->prev = cur->prev;
