@@ -20,7 +20,8 @@ using namespace std;
 #include "struktoj.h"
 
 #include "nomlist.c"
-#include "charo.c"
+#include "battle.h"
+//#include "charo.c"
 #include "charbuf.c"
 #include "reg.c"
 

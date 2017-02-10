@@ -1,4 +1,4 @@
-#include "fortovorto.h"
+#include "fv.h"
 
 enum battlestates
 {
@@ -32,8 +32,15 @@ enum battlestates
 	int score = 0;
 
 	FILE* glog;
-	
-	Charo Mistos[MISTOS];
+
+        battleQueue* bq = NULL;
+        
+        Charo* Spiela = NULL;	
+	Charo* Mistos[9];
+        Charo* Sp_squad[9];
+
+        cell ms_cell = {0,0,NULL};
+        cell sp_cell = {1,0,NULL};
 
 	charBuf *mistBuf;
 	charBuf *logBuf;
@@ -89,7 +96,21 @@ int main(int argc, char* args[])
 	int j = 0;
 	SDL_Color tColor= {0,180,0};
 	SDL_Event e;
-	state = NEW_GAME;
+	state = NEW_GAME; 
+        for (i=1;i<MISTOS;i++)
+	{
+		Mistos[i] = new Charo();
+                Sp_squad[i] = new Charo();
+	}
+        Spiela = new Charo();
+        Sp_squad[4] = Spiela;
+        for (i=1;i<MISTOS;i++)
+	{
+		ms_cell.mistos[i] = Mistos[i];
+                sp_cell.mistos[i] = Sp_squad[i];
+	}
+
+
 	logBuf = new charBuf(0,10,WIDTH/SIZE,26);
         mistBuf = new charBuf(0,10,WIDTH/SIZE,26); 
 	fieldBuf = new charBuf(5,0,15,10);
@@ -204,7 +225,14 @@ void newGame()
 	int i;
 	Chars nul = {0,0,0,0,0};
 	nul.i = 10;
-	Mistos[0].recreate(nul, name);
+        char nulnam [1];
+        nulnam[0] = '0';
+        for (i=1;i<MISTOS;i++)
+	{
+		Mistos[i].recreate(nul,nulnam);
+                Sp_squad[i].recreate(nul,nulnam);
+	}
+	spiela.recreate(nul, name);
 	level = 0;
 	sp = INITXP+FREEPTS;
 	xp = FREEPTS;
@@ -544,7 +572,7 @@ void Aut(int symb)  //Automato
 				SDL_StopTextInput();
 				strcpy(name,input);
 				newGame();
-				sprintf(curmes,"Greetings, %s.\n You know, you are some kind of WordSpeaker now - one of men, who can use words to transform the into Furious Charge. U wanna learn new words and, whatswhy, now you standing near Great Tomb of Leidenbringung, that was closed for ages.\nBefore you start your journey u must select your class, or your way of using words in battle.\n1)Barbaro - Great Warrior, who shouts and attacks his foes in Righteous Fury\n2)Sciencist - cunning intelegist, who uses his mind to reate deadly missiles with help og formulas\n3)Elementist - mage, that can see what is world made of, and who can use elements of this on world or his advantage in battle\n4)Random!",name);
+				sprintf(curmes,"Greetings, %s.\n You know, you are some kind of Tlatoani now - one of men, who can use words to transform the into Furious Charge. U wanna learn new words and, whatswhy, now you standing near Great Tomb of Leidenbringung, that was closed for ages.\nBefore you start your journey u must select your class, or your way of using words in battle.\n1)Barbaro - Great Warrior, who shouts and attacks his foes in Righteous Fury\n2)Sciencist - cunning intelegist, who uses his mind to reate deadly missiles with help og formulas\n3)Elementist - mage, that can see what is world made of, and who can use elements of this on world or his advantage in battle\n4)Random!",name);
 			}
 			else 
 			{
