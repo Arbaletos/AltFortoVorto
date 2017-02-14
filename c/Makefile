@@ -1,8 +1,6 @@
-OBJS = main.c
+OBJS = main.c charo.c nomlist.c
 
-DOP = charo.c nomlist.c
-
-CC = g++
+CC = gcc
 
 COMPILER_FLAGS = 
 

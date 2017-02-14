@@ -451,7 +451,7 @@ void Aut(int symb)  //Automato
 				 nexts = mains;
 			}
 			if (symb==4){
-				sprintf(curmes,"U run away like a dog!\n");
+				sprintf(curmes,"U run away like a scurrvy dog!\n");
 				state = MESSAGE;
 				next = MAIN_MAP;
 				nexts = mapmes;

@@ -1,14 +1,14 @@
-OBJS = main.c
+OBJS = btest.c
 
-DOP = charo.c nomlist.c
+DOP = btest.c
 
 CC = g++
 
 COMPILER_FLAGS = 
 
-LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf
+LINKER_FLAGS = -lm
 
-OBJ_NAME = fv
+OBJ_NAME = arena
 
 all: $(OBJS)
 	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)

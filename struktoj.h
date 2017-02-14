@@ -1,36 +1,38 @@
-#define FILELEN 12
-#define VORTLEN 8
-#define MESSIZE 800*600/16/16
-
-
-struct nomList
+/*
+struct reakto
 {
-	int len;
-	char **list;
+  reakt_type type;
+  int value;
+  void* target;
 };
-
-struct charBuf
+*/
+typedef struct
 {
-	char buf[MESSIZE];
-	int top;
-	int left;
-	int wid;
-	int hei;
-	int visible;
-};
+  int val;
+} u_val;
 
-struct Charo
+typedef struct 
 {
-	int maxhealth;
-	int health;
-	int atk;
-	int eva;
-	int damage;
-	int speed;
-	int id;
-	char* name;
-	int tired; //Have this Charo acted in this turn?
-};
+  int x;
+  int y;
+  Charo* mistos[9];
+} cell;
+
+typedef struct
+{
+  int w;
+  int h;
+  Charo* charo;
+  cell* cp;
+  int ter;
+} celo;
+
+typedef struct
+{
+  int type;
+  int time;
+  Ago* ago;
+} trigger;
 
 struct battleRes
 {
@@ -47,10 +49,4 @@ struct Chars
 	int d;
 	int i;
 };
-
-typedef struct Chars Chars;
-
-
-
-
 

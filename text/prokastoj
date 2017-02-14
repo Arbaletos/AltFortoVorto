@@ -1,0 +1,42 @@
+Prokastoj ruloj
+
+R S T   
+7 8 9 A
+4 5 6 O
+1 2 3 U
+
+Любое определительное слово можно использовать в дилетантской форме и профессиональной.
+В базовой версии профессиональной формы не будет.
+
+Дилетантская форма:
+ACT+TAR
+Самое дилетантское заклинание из всех это атака по лицу.
+
+BARBARO//ограничен яростью
+
+RAK - Яростный удар в лицо (+ATK+DMG)
+DOR - Критическая атака(CR/CD)
+MIN - Нанесение кровотечения(TIME/DMG)
+FAR - Кровожадный удар(Урон в себя ради топ-урона)(SELB/BON)
+ZAG - Отхил в случае кровотока опа
+
+SCIENCIST//ограничен ингридиентами
+
+DRAW - обычная стрела (ATK/DMG)
+ACID - отравленная стрела(TIME/DMG)
+KONC - конфузящая стрела(
+AOER - аое-стрела()
+SLOW - статическая стрела()
+
+ELEMENTIST//ограничен окружающими условиями
+
+DES -Простая атака
+FIR -Fire attack agains DMG-powerull enemies
+AER -Wind attack agains ATK-powerfull enemiues
+WAS -Water attack agains EVA-powerfull enemies
+TER -Earth attack against HP-powerull enmies
+
+Дилетант-заклинания 1
+
+BAR:
+
