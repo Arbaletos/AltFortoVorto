@@ -28,6 +28,14 @@ int LANG = 0;
   int drawChar(char text, SDL_Color tColor, int x, int y);
   int drawText(char* text, SDL_Color tColor, int x, int y);
 
+  void inputString(char *buff, charBuf* Buf);
+  
+  char* input;   //Buffer for input strings
+  int input_text = 0;   //Fact of inputing curmomente
+  charBuf *inputBuf;   //Buffer for write down inputed smt.
+
+  char * nomo;
+
 
 int main(int argc, char* args[])
 {
@@ -51,65 +59,89 @@ int main(int argc, char* args[])
     while(SDL_PollEvent(&e)!=0)
     {
       if (e.type == SDL_QUIT) quit = 1;
-      if (e.type == SDL_KEYDOWN)
-      {
-        switch(e.key.keysym.sym)
-        {
-          case SDLK_BACKSPACE:
-          break;
-          case SDLK_RETURN:
-          break;
-          case SDLK_ESCAPE:
-          break;
-        case SDLK_HOME:
-          {
-            SDL_Surface* pScreenShot = SDL_CreateRGBSurface(0,WIDTH,HEIGHT, 32, 0x00ff0000, 0x0000ff00, 0x000000ff,0xff000000);
-            if (pScreenShot)
-            {
-              SDL_RenderReadPixels(gRenderer,NULL,SDL_GetWindowPixelFormat(gWindow),pScreenShot->pixels,pScreenShot->pitch);
-              SDL_SaveBMP(pScreenShot,"Screen.bmp");
-              SDL_FreeSurface(pScreenShot);
-            }
-          }
-          break;
-        case SDLK_1: 
-        case SDLK_KP_1:
-          break;
-        case SDLK_2:
-        case SDLK_KP_2:
-          break;
-        case SDLK_3:
-        case SDLK_KP_3:
-          break;
-        case SDLK_4:
-        case SDLK_KP_4:
-          break;
-        case SDLK_5:
-        case SDLK_KP_5:
-          break;
-        case SDLK_6:
-        case SDLK_KP_6:
-          break;
-        case SDLK_7:
-        case SDLK_KP_7:
-          break;
-        case SDLK_8:
-        case SDLK_KP_8:
-          break;
-        case SDLK_9:
-        case SDLK_KP_9:
-          break;
-        case SDLK_0:
-        case SDLK_KP_0:
-          break;
-        }
-      }
       if (e.type == SDL_TEXTINPUT)
       {
+        if (input_text){
+          strcat(input, e.text.text);
+          if (inputBuf) inputBuf->append(e.text.text);
+        }
+      }
+      if (e.type == SDL_KEYDOWN)
+      {
+        if (input_text)
+        {
+          switch(e.key.keysym.sym)
+          {
+            case SDLK_BACKSPACE:
+              input[strlen(input)-2] = '\0';
+              if (inputBuf) inputBuf->backspace();
+              break;
+
+            case SDLK_RETURN:
+              SDL_StopTextInput();
+              input_text = 0; 
+              break;
+          }
+        }
+        else 
+        {
+          switch(e.key.keysym.sym)
+          {
+            case SDLK_RETURN:
+              break;
+            case SDLK_ESCAPE:
+              break;
+            case SDLK_HOME:
+              {
+                SDL_Surface* pScreenShot = SDL_CreateRGBSurface(0,WIDTH,HEIGHT, 32, 0x00ff0000, 0x0000ff00, 0x000000ff,0xff000000);
+                if (pScreenShot)
+                {
+                  SDL_RenderReadPixels(gRenderer,NULL,SDL_GetWindowPixelFormat(gWindow),pScreenShot->pixels,pScreenShot->pitch);
+                  SDL_SaveBMP(pScreenShot,"Screen.bmp");
+                  SDL_FreeSurface(pScreenShot);
+                }
+              }
+              break;
+            case SDLK_1: 
+            case SDLK_KP_1:
+              break;
+            case SDLK_2:
+            case SDLK_KP_2:
+              break;
+            case SDLK_3:
+            case SDLK_KP_3:
+              break;
+            case SDLK_4:
+            case SDLK_KP_4:
+              break;
+            case SDLK_5:
+            case SDLK_KP_5:
+              break;
+            case SDLK_6:
+            case SDLK_KP_6:
+              break;
+            case SDLK_7:
+            case SDLK_KP_7:
+              break;
+            case SDLK_8:
+            case SDLK_KP_8:
+              break;
+            case SDLK_9:
+            case SDLK_KP_9:
+              break;
+            case SDLK_0:
+            case SDLK_KP_0:
+              break;
+          }
+        }
       }
     }
     SDL_RenderClear(gRenderer);
     printBuf(mainBuf);
+//    nomo = new char(1000);
+//    inputString(nomo,mainBuf);
+//    if (!input_text) printf("%s",nomo);
+    
     SDL_RenderPresent(gRenderer);
   }
  
@@ -126,6 +158,18 @@ int main(int argc, char* args[])
   IMG_Quit();
   SDL_Quit();
 }
+
+void inputString(char *buff, charBuf* Buf=NULL)
+{
+  SDL_StartTextInput();
+  
+  inputBuf = Buf;
+  input = buff;
+  input[0] = '\0';
+  input_text = 1;
+}
+
+
 
 char* genBestNomo()
 {

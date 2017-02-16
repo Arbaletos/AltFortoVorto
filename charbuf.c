@@ -51,6 +51,12 @@ class charBuf
       }
     }
 
+    void backspace()  //simple backspace
+    {
+      buf[pos-1] = ' ';
+      pos--;
+    }
+
     void write(char * text, int x, int y)  //Use WRITE only to write text to buffer, und do not merge pseudograph and text info!
     {
       int i = 0;
