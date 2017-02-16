@@ -1,4 +1,3 @@
-#include "def.c"
 
 #pragma once
 
@@ -17,7 +16,7 @@
 
 using namespace std;
 
-#include "struktoj.h"
+#include "def.h"
 
 #include "nomlist.c"
 #include "battle.h"

@@ -35,16 +35,6 @@ enum trigoj
   ON_TIME
 } trigoj;
 
-class Charo;
-class Ago;
-class battleQueue;
-class Efektaro;
-class Reporto;
-class Celaro;
-
-#include "struktoj.h"
-
-
 class battleQueue
 {
   private:

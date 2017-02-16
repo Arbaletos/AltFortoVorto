@@ -1,5 +1,5 @@
-#include <string.h>
-#include <stdio.h>
+//#include <string.h>
+//#include <stdio.h>
 
 //A O U
 //7 8 9 R "Cxu A estas la tutan A columno?"

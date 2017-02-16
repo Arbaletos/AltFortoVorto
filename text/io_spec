@@ -1,0 +1,5 @@
+For this game to input user can use only his keyboard. input can go in two main styles:
+1)press a key - on hit of some key, something immedietaly s going on.
+2)Enter smt - you can not use keys like in previos variant(excluding escape and backpace) and u can only use ya keyboard to type some excellent type
+
+to output we you sdl engine, and using a text we put to user in face the... ahaha... what he deserves!
