@@ -2,12 +2,18 @@ int LANG = 0;
 #include "tekstaro.h"
 #include "fv.h"
 
-  enum gamestates
+enum gamestates
 {
   MAIN_MENU,
   WORLD_MENU,
   DUNGEON_MENU,
   BATTLE_MENU
+};
+
+enum symbols
+{
+  INIT,
+  ENTER
 };
 
   double sqrts[] = {0,1,1.41421356,1.73205080,2,2.23606798,2.44948974,2.6457513110,2.8284271247,3};
@@ -17,6 +23,8 @@ int LANG = 0;
   TTF_Font *gFont = NULL;
 
   FILE* glog;
+
+  int state;
 
   charBuf *mainBuf;
 
@@ -34,7 +42,10 @@ int LANG = 0;
   int input_text = 0;   //Fact of inputing curmomente
   charBuf *inputBuf;   //Buffer for write down inputed smt.
 
+  void Aut(int symb);
+  
   char * nomo;
+
 
 
 int main(int argc, char* args[])
@@ -49,9 +60,11 @@ int main(int argc, char* args[])
   SDL_Color tColor= {0,180,0};
   SDL_Event e;
 //  mainBuf = new charBuf(0,0,WIDTH/SIZE,HEIGHT/SIZE);
+  state = MAIN_MENU;
   mainBuf = new charBuf(0,0,WIDTH/SIZE,HEIGHT/SIZE);
-  mainBuf->append("Tell me... Do you bleed? You will!");
-  mainBuf->append("Patro nia kiu estas en la cxielo sankta estu via nomo estu regxeco via kiel en la cxielo tiel ankaux sur la tero panon nian cxiutagan doni al ni hodiaux!");
+//  mainBuf->append("Tell me... Do you bleed?");
+//  mainBuf->append("Patro nia kiu estas en la cxielo sankta estu via nomo estu regxeco via kiel en la cxielo tiel ankaux sur la tero panon nian cxiutagan doni al ni hodiaux!");
+  Aut(INIT);
   srand(time(0));
 //}--------UPDATING----------------------->
   while(!quit)
@@ -63,7 +76,7 @@ int main(int argc, char* args[])
       {
         if (input_text){
           strcat(input, e.text.text);
-          if (inputBuf) inputBuf->append(e.text.text);
+          if (inputBuf) inputBuf->append(1, e.text.text);
         }
       }
       if (e.type == SDL_KEYDOWN)
@@ -79,7 +92,8 @@ int main(int argc, char* args[])
 
             case SDLK_RETURN:
               SDL_StopTextInput();
-              input_text = 0; 
+              input_text = 0;
+              Aut(ENTER); 
               break;
           }
         }
@@ -159,6 +173,33 @@ int main(int argc, char* args[])
   SDL_Quit();
 }
 
+
+void Aut(int symb)
+{
+  enum {
+    BEGIN,
+    ENTER_NAME
+  };
+  static int prog = BEGIN;
+  static char name[100];
+  static char buf[BUFFSIZE];
+  if (state==MAIN_MENU)
+  {
+    if (prog == ENTER_NAME && symb == ENTER)
+    {
+//      mainBuf->append(sprintf(buf, "\nTell me, %s, do you bleed?\n",name), buf);
+      mainBuf->append(sprintf(buf, "Say me your name, %s\n","Beach!"), buf);
+    }
+    if (prog == BEGIN)
+    {
+//      sprintf(buf,"Say me your name.\n");
+      mainBuf->append(sprintf(buf, "Say me your name, %s\n","Beach!"), buf);
+      inputString(name, mainBuf);
+      prog = ENTER_NAME;
+    }
+  }
+}
+
 void inputString(char *buff, charBuf* Buf=NULL)
 {
   SDL_StartTextInput();
@@ -168,8 +209,6 @@ void inputString(char *buff, charBuf* Buf=NULL)
   input[0] = '\0';
   input_text = 1;
 }
-
-
 
 char* genBestNomo()
 {

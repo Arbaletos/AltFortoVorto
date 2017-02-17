@@ -36,7 +36,7 @@ class charBuf
 // 8  9 10 11
 //12 13 14 15
 
-    void append(char * text, int clr = 0) // Use clear = 1 to flush the buffer before writing.
+    void append(int len, char * text, int clr = 0) // Use clear = 1 to flush the buffer before writing.
     {
       int i = 0;
       if (clr) clear();
