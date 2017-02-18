@@ -13,3 +13,6 @@
 #define FREEPTS 50				//free xp points
 #define INITXP 200				//random allocated xp points
 #define VORTLEN 8				//length of wordpart
+#define RGB_R 0
+#define RGB_G 180
+#define RGB_B 0

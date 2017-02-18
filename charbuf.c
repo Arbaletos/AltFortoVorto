@@ -1,7 +1,10 @@
+  int drawChar(char text, SDL_Color tColor, int x, int y);
+
 class charBuf
 {
   private:
     char buf[BUFFSIZE];
+    SDL_Color col[BUFFSIZE];
     int top;
     int left;
     int wid;
@@ -36,16 +39,29 @@ class charBuf
 // 8  9 10 11
 //12 13 14 15
 
-    void append(int len, char * text, int clr = 0) // Use clear = 1 to flush the buffer before writing.
+    void append(int len, char * text, int clr = 0, SDL_Color* color = NULL) // Use clear = 1 to flush the buffer before writing.
     {
       int i = 0;
+      SDL_Color cur_col = {RGB_R,RGB_G,RGB_B};
+      if (color) 
+      {
+        cur_col.r = color->r;
+        cur_col.g = color->g;
+        cur_col.b = color->b;
+      }
       if (clr) clear();
       for (i=0;i<strlen(text);i++)
       {
         if (i+pos < BUFFSIZE)
         {
           if (text[i]=='\n') pos = (pos + wid) / wid * wid -1;
-          else buf[pos] = text[i];
+          else
+          {
+            buf[pos] = text[i];
+            col[pos].r = cur_col.r;
+            col[pos].g = cur_col.g;
+            col[pos].b = cur_col.b;
+          }
           pos++;
         } 
       }
@@ -122,4 +138,23 @@ class charBuf
     {
       visible = 0;
     }
+
+    void printBuf()	//PrintBuf
+    {
+    int i;
+    int j;
+    if (visible)
+    {
+    SDL_Color tColor = {RGB_R,RGB_G,RGB_B};
+    for (i=0;i<getHeight();i++)
+    {
+      for (j=0;j<getWidth();j++)
+      {
+      // if (buff->getChar(i,j)) drawChar(buff->getChar(j,i),tColor,(j+buff->getLeft())*SIZE,(i+buff->getTop())*SIZE);
+        drawChar(getChar(j,i),col[i*wid+j],(j+getLeft())*SIZE,(i+getTop())*SIZE);
+      } 
+    }
+    }
+  }
+
 };

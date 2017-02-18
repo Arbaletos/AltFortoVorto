@@ -33,7 +33,6 @@ enum symbols
 
   int init();
   int load();
-  int drawChar(char text, SDL_Color tColor, int x, int y);
   int drawText(char* text, SDL_Color tColor, int x, int y);
 
   void inputString(char *buff, charBuf* Buf);
@@ -41,6 +40,7 @@ enum symbols
   char* input;   //Buffer for input strings
   int input_text = 0;   //Fact of inputing curmomente
   charBuf *inputBuf;   //Buffer for write down inputed smt.
+  int input_len = 0;
 
   void Aut(int symb);
   
@@ -75,6 +75,7 @@ int main(int argc, char* args[])
       if (e.type == SDL_TEXTINPUT)
       {
         if (input_text){
+          input_len++;
           strcat(input, e.text.text);
           if (inputBuf) inputBuf->append(1, e.text.text);
         }
@@ -86,19 +87,26 @@ int main(int argc, char* args[])
           switch(e.key.keysym.sym)
           {
             case SDLK_BACKSPACE:
-              input[strlen(input)-2] = '\0';
-              if (inputBuf) inputBuf->backspace();
+              if (input_len>0)
+              {
+                input_len--;
+                input[strlen(input)-2] = '\0';
+                if (inputBuf) inputBuf->backspace();
+              }
               break;
 
             case SDLK_RETURN:
-              SDL_StopTextInput();
-              input_text = 0;
-              Aut(ENTER); 
+              if (input_len){
+                SDL_StopTextInput();
+                input_text = 0;
+                Aut(ENTER); 
+              }
               break;
           }
         }
         else 
         {
+          printf("keycode: %d\n",e.key.keysym.sym);
           switch(e.key.keysym.sym)
           {
             case SDLK_RETURN:
@@ -151,7 +159,7 @@ int main(int argc, char* args[])
       }
     }
     SDL_RenderClear(gRenderer);
-    printBuf(mainBuf);
+    mainBuf->printBuf();
 //    nomo = new char(1000);
 //    inputString(nomo,mainBuf);
 //    if (!input_text) printf("%s",nomo);
@@ -183,19 +191,26 @@ void Aut(int symb)
   static int prog = BEGIN;
   static char name[100];
   static char buf[BUFFSIZE];
+      mainBuf->append(sprintf(buf, "state: %d, symbol: %d\n",prog,symb),buf);
   if (state==MAIN_MENU)
   {
-    if (prog == ENTER_NAME && symb == ENTER)
+    switch (prog)
     {
-//      mainBuf->append(sprintf(buf, "\nTell me, %s, do you bleed?\n",name), buf);
-      mainBuf->append(sprintf(buf, "Say me your name, %s\n","Beach!"), buf);
-    }
-    if (prog == BEGIN)
-    {
+      case ENTER_NAME:
+        if (symb == ENTER)
+        {
+        SDL_Color blood = {180,0,0};
+      mainBuf->append(sprintf(buf, "\nTell me, %s, do you bleed?\n",name), buf);
+      mainBuf->append(sprintf(buf, "\nYOU WILL!\n"), buf, 0, &blood);
+//          mainBuf->append(sprintf(buf, "This is second phrase, %s\n","Beach!"), buf);
+        }
+        break;
+      case BEGIN:
 //      sprintf(buf,"Say me your name.\n");
-      mainBuf->append(sprintf(buf, "Say me your name, %s\n","Beach!"), buf);
-      inputString(name, mainBuf);
-      prog = ENTER_NAME;
+        mainBuf->append(sprintf(buf, "Say me your name, %s\n> ","Beach!"),buf);
+        inputString(name, mainBuf);
+        prog = ENTER_NAME;
+        break;
     }
   }
 }
@@ -208,6 +223,7 @@ void inputString(char *buff, charBuf* Buf=NULL)
   input = buff;
   input[0] = '\0';
   input_text = 1;
+  input_len = 0;
 }
 
 char* genBestNomo()
@@ -252,20 +268,6 @@ int drawText(char* text, SDL_Color tColor, int x,int y)
   SDL_DestroyTexture(tTexture);
 }
 
-void printBuf(charBuf *buff)	//PrintBuf
-{
-  int i;
-  int j;
-  SDL_Color tColor = {0,200,0};
-  for (i=0;i<buff->getHeight();i++)
-  {
-    for (j=0;j<buff->getWidth();j++)
-    {
-     // if (buff->getChar(i,j)) drawChar(buff->getChar(j,i),tColor,(j+buff->getLeft())*SIZE,(i+buff->getTop())*SIZE);
-      drawChar(buff->getChar(j,i),tColor,(j+buff->getLeft())*SIZE,(i+buff->getTop())*SIZE);
-    }
-  }
-}
 
 int init()
 {
@@ -287,7 +289,8 @@ int init()
   {
     printf("Kein Fonts ahahaha %s\n", TTF_GetError());
     ret = 0;
-  } 
+  }
+  TTF_ByteSwappedUNICODE(1); 
 
 
   gWindow = SDL_CreateWindow( "Forto Vorto", 0,0,WIDTH,HEIGHT,SDL_WINDOW_SHOWN);	
