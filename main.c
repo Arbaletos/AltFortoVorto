@@ -5,6 +5,7 @@ int LANG = 0;
 enum gamestates
 {
   MAIN_MENU,
+  CC_MENU,
   WORLD_MENU,
   DUNGEON_MENU,
   BATTLE_MENU
@@ -12,8 +13,12 @@ enum gamestates
 
 enum symbols
 {
+  NONE,
   INIT,
-  ENTER
+  ENTER,
+  ESCAPE,
+  UP,
+  DOWN
 };
 
   double sqrts[] = {0,1,1.41421356,1.73205080,2,2.23606798,2.44948974,2.6457513110,2.8284271247,3};
@@ -25,6 +30,7 @@ enum symbols
   FILE* glog;
 
   int state;
+  int quit = 0;
 
   charBuf *mainBuf;
 
@@ -53,8 +59,8 @@ int main(int argc, char* args[])
 //}---------INITIALIZATION/LOADING-------->
   if (!init()) exit(0);
   if (!load()) exit(0);
+  static int enter = 1;
   SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00,0x00,0x00);
-  int quit = 0;
   int i = 0;
   int j = 0;
   SDL_Color tColor= {0,180,0};
@@ -80,6 +86,10 @@ int main(int argc, char* args[])
           if (inputBuf) inputBuf->append(1, e.text.text);
         }
       }
+      if (e.type == SDL_KEYUP)
+      {
+        if (e.key.keysym.sym == SDLK_RETURN) enter = 0;
+      }
       if (e.type == SDL_KEYDOWN)
       {
         if (input_text)
@@ -96,22 +106,34 @@ int main(int argc, char* args[])
               break;
 
             case SDLK_RETURN:
-              if (input_len){
-                SDL_StopTextInput();
-                input_text = 0;
-                Aut(ENTER); 
+              if (!enter){
+                if (input_len){
+                  SDL_StopTextInput();
+                  input_text = 0;
+                  Aut(ENTER); 
+                  enter = 1;
+                }
               }
               break;
           }
         }
         else 
         {
-          printf("keycode: %d\n",e.key.keysym.sym);
+  //        printf("keycode: %d\n",e.key.keysym.sym);
           switch(e.key.keysym.sym)
           {
+            case SDLK_UP:
+              Aut(UP);
+              break;
+            case SDLK_DOWN:
+              Aut(DOWN);
+              break;
             case SDLK_RETURN:
+              if (!enter) Aut(ENTER);
+              enter = 1;
               break;
             case SDLK_ESCAPE:
+              Aut(ESCAPE);
               break;
             case SDLK_HOME:
               {
@@ -181,37 +203,109 @@ int main(int argc, char* args[])
   SDL_Quit();
 }
 
-
-void Aut(int symb)
+// Avto
+void Aut(int symb)  
 {
   enum {
     BEGIN,
-    ENTER_NAME
+    ENTER_NAME,
+    SELECT_CLASS,
+    SELECT_WORLD
   };
+  static int select = 0;
   static int prog = BEGIN;
   static char name[100];
   static char buf[BUFFSIZE];
-      mainBuf->append(sprintf(buf, "state: %d, symbol: %d\n",prog,symb),buf);
-  if (state==MAIN_MENU)
+//mainBuf->append(sprintf(buf, "state: %d, symbol: %d\n",prog,symb),buf);
+  switch (state)
   {
-    switch (prog)
-    {
-      case ENTER_NAME:
-        if (symb == ENTER)
-        {
-        SDL_Color blood = {180,0,0};
-      mainBuf->append(sprintf(buf, "\nTell me, %s, do you bleed?\n",name), buf);
-      mainBuf->append(sprintf(buf, "\nYOU WILL!\n"), buf, 0, &blood);
-//          mainBuf->append(sprintf(buf, "This is second phrase, %s\n","Beach!"), buf);
-        }
+    case MAIN_MENU:
+      switch (prog)
+      {
+        case SELECT_WORLD:
+          mainBuf->append(sprintf(buf, "I am really sorry, but you can only \
+choose the Chaos World for now. Why? Because i havn't implemented other types \
+of worlds. The Chaos World is a World, in which every new througrun is \
+different, every castname, and inhabtans are different. It's a very good place \
+for warriors of Sacred Random, but not so good for Fighters of Stability. Hit \
+[ENTER] To Proceed to your destiny, or [ESCAPE] to escape the dangerous messes \
+of leiden and adventures!\n"),buf,1);
+          if (symb==ENTER)
+          {
+            state = CC_MENU;
+            prog =ENTER_NAME; 
+            Aut(NONE);
+          }
+          if (symb==ESCAPE)
+          {
+            prog = BEGIN;
+            Aut(NONE);
+          }
         break;
+        case BEGIN:
+          int options = 5;
+          SDL_Color* colors[5];
+          SDL_Color yellow = {180,180,0};
+          SDL_Color* def = NULL;
+          int i;
+          if (symb==UP) select--;
+          if (symb==DOWN) select++;
+          if (select<0) select = options - 1;
+          if (select>=options) select = 0;
+          for (i=0;i<options;i++)
+          {
+            colors[i] = def; 
+          }
+          colors[select] = &yellow;
+          mainBuf->append(sprintf(buf, "Start the game\n"),buf, 1, colors[0]);
+          mainBuf->append(sprintf(buf, " Create World\n"),buf, 0, colors[1]);
+          mainBuf->append(sprintf(buf, "  Settings\n"),buf, 0, colors[2]);
+          mainBuf->append(sprintf(buf, "   Credit\n"),buf, 0, colors[3]);
+          mainBuf->append(sprintf(buf, "    Exit\n"),buf, 0, colors[4]);
+          if (symb==ENTER)
+          {
+            if (select==0)
+            {
+              prog = SELECT_WORLD;
+              Aut(NONE);
+            }
+            if (select==4) quit = 1;
+          }
+        break;
+/*
       case BEGIN:
 //      sprintf(buf,"Say me your name.\n");
         mainBuf->append(sprintf(buf, "Say me your name, %s\n> ","Beach!"),buf);
         inputString(name, mainBuf);
         prog = ENTER_NAME;
         break;
-    }
+      case ENTER_NAME:
+        if (symb == ENTER)
+        {
+        SDL_Color blood = {180,0,0};
+        mainBuf->append(sprintf(buf, "\nTell me, %s, do you bleed?\n",name), buf);
+        mainBuf->append(sprintf(buf, "\nYOU WILL!\n"), buf, 0, &blood);
+//          mainBuf->append(sprintf(buf, "This is second phrase, %s\n","Beach!"), buf);
+        }
+        break;
+*/
+      }   
+    break;
+    case CC_MENU:
+      switch (prog)
+      {
+        case ENTER_NAME:
+          mainBuf->append(sprintf(buf, "Welcome to FortoVorto game!\n You are the \
+one of Tlatoani - the Mighty People, who use words to achieve magnificient \
+power! But to get your mind and tongue sharp, and to speak more excellent \
+speeches, to ceome one day HUEI TLATOANI, the Great Wordspeaker, you need to \
+always find sources of new words!\nSo, in eternal adventures, just like other \
+Tlatoani, you seek for lore... So. What is your name, Tlatoani?\n"),buf,1);   
+          inputString(name, mainBuf);
+          if (symb==ENTER) prog = SELECT_CLASS;
+         break;
+       }
+    break;
   }
 }
 
