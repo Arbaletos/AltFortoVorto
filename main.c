@@ -1,4 +1,4 @@
-int LANG = 0;
+int LANG = 1;
 #include "tekstaro.h"
 #include "fv.h"
 
@@ -216,6 +216,27 @@ void Aut(int symb)
   static int prog = BEGIN;
   static char name[100];
   static char buf[BUFFSIZE];
+  static int vert_menu = 1;
+  static int options = 5;
+  static SDL_Color* colors[10];
+  static SDL_Color yellow = {200,200,0};
+  static SDL_Color red = {200,0,0};
+  static SDL_Color* def = NULL;
+  
+
+  if (vert_menu)   //Universal up-down menu adapter
+  {
+    int i;
+    if (symb==UP) select--;
+    if (symb==DOWN) select++;
+    if (select<0) select = options - 1;
+    if (select>=options) select = 0;
+    for (i=0;i<options;i++)
+    {
+      colors[i] = def; 
+    }
+    colors[select] = &yellow;
+  }
 //mainBuf->append(sprintf(buf, "state: %d, symbol: %d\n",prog,symb),buf);
   switch (state)
   {
@@ -233,7 +254,7 @@ of leiden and adventures!\n"),buf,1);
           if (symb==ENTER)
           {
             state = CC_MENU;
-            prog =ENTER_NAME; 
+            prog = ENTER_NAME; 
             Aut(NONE);
           }
           if (symb==ESCAPE)
@@ -243,20 +264,7 @@ of leiden and adventures!\n"),buf,1);
           }
         break;
         case BEGIN:
-          int options = 5;
-          SDL_Color* colors[5];
-          SDL_Color yellow = {180,180,0};
-          SDL_Color* def = NULL;
-          int i;
-          if (symb==UP) select--;
-          if (symb==DOWN) select++;
-          if (select<0) select = options - 1;
-          if (select>=options) select = 0;
-          for (i=0;i<options;i++)
-          {
-            colors[i] = def; 
-          }
-          colors[select] = &yellow;
+          options = 5;
           mainBuf->append(sprintf(buf, "Start the game\n"),buf, 1, colors[0]);
           mainBuf->append(sprintf(buf, " Create World\n"),buf, 0, colors[1]);
           mainBuf->append(sprintf(buf, "  Settings\n"),buf, 0, colors[2]);
@@ -266,6 +274,7 @@ of leiden and adventures!\n"),buf,1);
           {
             if (select==0)
             {
+              vert_menu = 0;
               prog = SELECT_WORLD;
               Aut(NONE);
             }
@@ -302,8 +311,44 @@ speeches, to ceome one day HUEI TLATOANI, the Great Wordspeaker, you need to \
 always find sources of new words!\nSo, in eternal adventures, just like other \
 Tlatoani, you seek for lore... So. What is your name, Tlatoani?\n"),buf,1);   
           inputString(name, mainBuf);
-          if (symb==ENTER) prog = SELECT_CLASS;
+          if (symb==ENTER) 
+          {
+            prog = SELECT_CLASS;
+            vert_menu = 1;
+            options = 6;
+            Aut(NONE);
+          }
+          select = 0;
+        break;
+        case SELECT_CLASS:
+          options = 6;
+          vert_menu = 1;
+          colors[select] = &yellow;
+          mainBuf->append(sprintf(buf, "There are different classes of Tlatoani. Someone use wordpower to \
+fortify their own strength, some enchant their items, some speaks to gods, spirits, souls and e.t.c. \n\
+Choose your Tloatoani Archtype wisely!\n\n"),buf, 1);
+          mainBuf->append(sprintf(buf, "Barbaro\n"),buf, 0, colors[0]);
+          mainBuf->append(sprintf(buf, "Skiencist\n"),buf, 0, colors[1]);
+          mainBuf->append(sprintf(buf, "Elementalist\n"),buf, 0, colors[2]);
+          mainBuf->append(sprintf(buf, "Necromancer\n"),buf, 0, colors[3]);
+          mainBuf->append(sprintf(buf, "Musician\n"),buf, 0, colors[4]);
+          mainBuf->append(sprintf(buf, "Back\n\n\n"),buf, 0, colors[5]);
+          
+          mainBuf->append(sprintf(buf, "CLASS DESCRIPTION:\n"),buf, 0, &red);
+          if (select <= options-1)
+            mainBuf->append(sprintf(buf, class_desc_mes[select]),buf, 0);
+          
+   //       if (select==0) 
+          if (symb==ENTER)
+          {
+            if (select==0)
+            {
+              Aut(NONE);
+            }
+//            if (select==5) quit();
+          }
          break;
+
        }
     break;
   }
@@ -399,6 +444,7 @@ int load()
 {
   int ret = 1;
   gFont = TTF_OpenFont("res/COURIER.TTF",SIZE);
+  loadText(LANG);
   if (!gFont)
   {
     printf("Some Shit with your Courier Font! %s\n",TTF_GetError());

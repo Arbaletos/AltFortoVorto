@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 #include "def.h"
 
 #include "nomlist.c"

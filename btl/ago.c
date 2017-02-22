@@ -22,14 +22,14 @@
     if (TYPE == GET_DAMAGE)
     {
         kreanto->applyTriggers(caller,ON_GET_DAMAGE,turntime);
-	printf(get_damage_mes_fmt[LANG],kreanto->getName(),val);
+	printf(get_damage_mes_fmt,kreanto->getName(),val);
         kreanto->changeHealth(-val);
         Reporto* ret = new stringRep("Get damage!\n");
         return ret; 
     }
     if (TYPE == HEAL_DAMAGE)
     {
-	printf(heal_damage_mes_fmt[LANG],kreanto->getName(),val);
+	printf(heal_damage_mes_fmt,kreanto->getName(),val);
         kreanto->applyTriggers(caller,ON_HEAL_DAMAGE,turntime);
         kreanto->changeHealth(val);
         Reporto* ret = new stringRep("Healed damage!\n");
